@@ -129,68 +129,9 @@ html, body {
 /* Defeat the default `min-width: auto` on flex/grid items — without
    this, long text or wide buttons can force their parent past the
    viewport even with max-width set. */
-.po-shell *, .tabbar * { min-width: 0; }
-/* No image, video, or canvas can ever push the page past the viewport */
+.po-shell *, /* No image, video, or canvas can ever push the page past the viewport */
 img, video, canvas, svg { max-width: 100%; }
 
-/* ---------- Bottom tab bar (shared with dashboard) ---------- */
-.tabbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(10,10,11,0) 0%, rgba(10,10,11,0.78) 38%, rgba(10,10,11,0.94) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  pointer-events: none;
-}
-.tabbar-inner {
-  pointer-events: auto;
-  display: flex;
-  width: 100%;
-  max-width: 460px;
-  gap: 6px;
-  padding: 6px;
-  background: rgba(20, 20, 22, 0.72);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.55);
-}
-.tab {
-  flex: 1 1 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: 13px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--text-2);
-  text-decoration: none;
-  background: transparent;
-  border: 1px solid transparent;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.tab:hover { color: var(--text-1); }
-.tab[aria-current="page"] {
-  color: var(--text-1);
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.10);
-}
-.tab-icon {
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
 .tab-icon svg { width: 100%; height: 100%; display: block; }
 .po-day-pill {
   display: inline-flex; align-items: center; gap: 8px;
@@ -726,9 +667,7 @@ img, video, canvas, svg { max-width: 100%; }
   .wt-photo-grid { gap: 8px; }
 
   /* Bottom tab bar — slightly smaller pills so both labels always fit */
-  .tab { padding: 11px 10px; font-size: 13px; }
-  .tabbar { padding-left: 12px; padding-right: 12px; }
-}
+  }
 
 /* Anything narrower than ~360px (iPhone SE / mini) gets a final pass */
 @media (max-width: 360px) {
@@ -1261,6 +1200,36 @@ img, video, canvas, svg { max-width: 100%; }
 }
 
 .hidden { display: none !important; }
+
+/* -- Tab bar -- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  display: flex; justify-content: center;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.82) 38%, rgba(5,5,6,0.97) 100%);
+  pointer-events: none;
+}
+.tabbar * { min-width: 0; }
+.tabbar-inner {
+  pointer-events: auto; display: flex; width: 100%;
+  max-width: 520px; gap: 4px; padding: 5px;
+  background: rgba(20,20,22,0.72); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; padding: 7px 4px; border-radius: 14px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.45); text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.tab:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+.tab[aria-current="page"] { background: rgba(255,255,255,0.10); color: #ffffff; }
+.tab-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -3467,6 +3436,7 @@ img, video, canvas, svg { max-width: 100%; }
 
 
 
+
 <nav class="tabbar" aria-label="Main navigation">
   <div class="tabbar-inner">
     <a class="tab" href="index.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg></span>Dashboard</a>
@@ -3475,5 +3445,6 @@ img, video, canvas, svg { max-width: 100%; }
     <a class="tab" href="gym.html" aria-current="page"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43l-1.42-1.42-1.42 1.41 1.42 1.42-2.83 2.83-1.42-1.42-1.41 1.41 1.42 1.42L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.41-1.41 1.42 1.41 1.41-1.41-1.41-1.42 2.83-2.83 1.41 1.41 1.41-1.41-1.41-1.42z"/></svg></span>Gym</a>
   </div>
 </nav>
+
 </body>
 </html>

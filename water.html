@@ -454,12 +454,13 @@ html, body {
   .water-num { font-size: 48px; }
 }
 
-/* ── Tab bar ── */
+
+/* -- Tab bar -- */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
   display: flex; justify-content: center;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(10,10,11,0) 0%, rgba(10,10,11,0.82) 38%, rgba(10,10,11,0.97) 100%);
+  background: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.82) 38%, rgba(5,5,6,0.97) 100%);
   pointer-events: none;
 }
 .tabbar * { min-width: 0; }
@@ -482,6 +483,7 @@ html, body {
 .tab:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
 .tab[aria-current="page"] { background: rgba(255,255,255,0.10); color: #ffffff; }
 .tab-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -1207,6 +1209,7 @@ html, body {
 })();
 </script>
 
+
 <nav class="tabbar" aria-label="Main navigation">
   <div class="tabbar-inner">
     <a class="tab" href="index.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg></span>Dashboard</a>
@@ -1215,5 +1218,6 @@ html, body {
     <a class="tab" href="gym.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43l-1.42-1.42-1.42 1.41 1.42 1.42-2.83 2.83-1.42-1.42-1.41 1.41 1.42 1.42L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.41-1.41 1.42 1.41 1.41-1.41-1.41-1.42 2.83-2.83 1.41 1.41 1.41-1.41-1.41-1.42z"/></svg></span>Gym</a>
   </div>
 </nav>
+
 </body>
 </html>

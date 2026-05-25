@@ -809,35 +809,7 @@
     align-self: flex-start;
   }
 
-  /* ── Tab bar ── */
-.tabbar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-  display: flex; justify-content: center;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.82) 38%, rgba(5,5,6,0.97) 100%);
-  pointer-events: none;
-}
-.tabbar * { min-width: 0; }
-.tabbar-inner {
-  pointer-events: auto; display: flex; width: 100%;
-  max-width: 520px; gap: 4px; padding: 5px;
-  background: rgba(20,20,22,0.72); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-}
-.tab {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 2px; padding: 7px 4px; border-radius: 14px;
-  font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
-  color: rgba(255,255,255,0.45); text-decoration: none;
-  transition: background 0.18s ease, color 0.18s ease;
-}
-.tab:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
-.tab[aria-current="page"] { background: rgba(255,255,255,0.10); color: #ffffff; }
-.tab-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
-/* ── Sync indicator ── */
+  /* ── Sync indicator ── */
   .sync-dot {
     position: fixed;
     bottom: 16px;
@@ -870,6 +842,36 @@
     .ring-percent { font-size: 32px; }
     .ring-status { font-size: 13px; }
   }
+
+/* -- Tab bar -- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  display: flex; justify-content: center;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.82) 38%, rgba(5,5,6,0.97) 100%);
+  pointer-events: none;
+}
+.tabbar * { min-width: 0; }
+.tabbar-inner {
+  pointer-events: auto; display: flex; width: 100%;
+  max-width: 520px; gap: 4px; padding: 5px;
+  background: rgba(20,20,22,0.72); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; padding: 7px 4px; border-radius: 14px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.45); text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.tab:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+.tab[aria-current="page"] { background: rgba(255,255,255,0.10); color: #ffffff; }
+.tab-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
+
 </style>
 </head>
 <body>
@@ -990,14 +992,6 @@
 </div>
 
 
-<nav class="tabbar" aria-label="Main navigation">
-  <div class="tabbar-inner">
-    <a class="tab" href="index.html" aria-current="page"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg></span>Dashboard</a>
-    <a class="tab" href="stack.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10.5 3.5a1.5 1.5 0 013 0V5h2.25A2.25 2.25 0 0118 7.25v.75H6v-.75A2.25 2.25 0 018.25 5H10.5V3.5zM5.25 9.5A.75.75 0 005 10.25v9A2.25 2.25 0 007.25 21.5h9.5A2.25 2.25 0 0019 19.25v-9a.75.75 0 00-.75-.75H5.75a.5.5 0 01-.5-.5z"/><rect x="5" y="9" width="14" height="2.5" rx=".75"/></svg></span>Stack</a>
-    <a class="tab" href="water.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0C19 10.5 12 2 12 2z"/></svg></span>Water</a>
-    <a class="tab" href="gym.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43l-1.42-1.42-1.42 1.41 1.42 1.42-2.83 2.83-1.42-1.42-1.41 1.41 1.42 1.42L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.41-1.41 1.42 1.41 1.41-1.41-1.41-1.42 2.83-2.83 1.41 1.41 1.41-1.41-1.41-1.42z"/></svg></span>Gym</a>
-  </div>
-</nav>
 <script>
   // ── Constants ──
   const WAKE_HOUR  = 8;
@@ -1785,5 +1779,15 @@
     startTicker();
   })();
 </script>
+
+<nav class="tabbar" aria-label="Main navigation">
+  <div class="tabbar-inner">
+    <a class="tab" href="index.html" aria-current="page"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg></span>Dashboard</a>
+    <a class="tab" href="stack.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10.5 3.5a1.5 1.5 0 013 0V5h2.25A2.25 2.25 0 0118 7.25v.75H6v-.75A2.25 2.25 0 018.25 5H10.5V3.5zM5.25 9.5A.75.75 0 005 10.25v9A2.25 2.25 0 007.25 21.5h9.5A2.25 2.25 0 0019 19.25v-9a.75.75 0 00-.75-.75H5.75a.5.5 0 01-.5-.5z"/><rect x="5" y="9" width="14" height="2.5" rx=".75"/></svg></span>Stack</a>
+    <a class="tab" href="water.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0C19 10.5 12 2 12 2z"/></svg></span>Water</a>
+    <a class="tab" href="gym.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43l-1.42-1.42-1.42 1.41 1.42 1.42-2.83 2.83-1.42-1.42-1.41 1.41 1.42 1.42L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.41-1.41 1.42 1.41 1.41-1.41-1.41-1.42 2.83-2.83 1.41 1.41 1.41-1.41-1.41-1.42z"/></svg></span>Gym</a>
+  </div>
+</nav>
+
 </body>
 </html>
