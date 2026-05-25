@@ -1199,7 +1199,7 @@
     } else if (done === total) {
       items = [{ status: 'done', text: '✓ All goals done — solid day.' }];
     } else {
-      items = goals.filter(g => !g.done).map(g => ({ status: 'pending', text: g.text }));
+      items = goals.filter(g => !g.done).map(g => ({ status: 'pending', text: fixMojibake(g.text) }));
     }
     return { items, done, total };
   }
@@ -1362,6 +1362,19 @@
       .replace(/"/g, '&quot;');
   }
 
+  function fixMojibake(str) {
+    if (!str || typeof str !== 'string') return str;
+    if (!/[\x80-\xff]/.test(str)) return str;
+    for (let i = 0; i < str.length; i++) {
+      if (str.charCodeAt(i) > 0xff) return str;
+    }
+    try {
+      const bytes = new Uint8Array(str.length);
+      for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch (e) { return str; }
+  }
+
   // ── Render today header ──
   function renderTodayHeader() {
     const key = `goals:${getActiveDateString()}`;
@@ -1520,7 +1533,7 @@
     // Text
     const textEl = document.createElement('span');
     textEl.className = 'goal-text';
-    textEl.textContent = g.text;
+    textEl.textContent = fixMojibake(g.text);
     li.appendChild(textEl);
 
     // Queue button
