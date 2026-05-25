@@ -169,21 +169,23 @@
   }
 
   .goal-ticker-row.is-leaving {
-    animation: ticker-leave 0.45s cubic-bezier(0.55, 0, 0.55, 1) forwards;
+    animation: ticker-leave 0.25s ease forwards;
   }
 
   .goal-ticker-row.is-entering {
-    animation: ticker-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+    animation: ticker-enter 0.25s ease forwards;
+    animation-delay: 0.28s;
   }
 
   @keyframes ticker-leave {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-100%); }
+    from { opacity: 1; }
+    to   { opacity: 0; }
   }
 
   @keyframes ticker-enter {
-    from { opacity: 0; transform: translateY(100%); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   .goal-ticker-status {
@@ -1233,7 +1235,7 @@
       oldRow.classList.add('is-leaving');
       newRow.classList.add('is-entering');
       stage.appendChild(newRow);
-      setTimeout(() => { if (oldRow.parentNode) oldRow.remove(); }, 460);
+      setTimeout(() => { if (oldRow.parentNode) oldRow.remove(); }, 280);
     }
   }
 
