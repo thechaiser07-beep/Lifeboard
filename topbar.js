@@ -176,7 +176,7 @@ body.topbar-modal-open {
   </a>
   <a href="stack.html" class="topbar-pill" id="topbarStack">
     <span class="topbar-pill-dot"></span>
-    <span class="topbar-pill-label">STACK</span>
+    <span class="topbar-pill-label">SUPPS</span>
     <span class="topbar-pill-count" id="topbarStackCount">—/—</span>
   </a>
   <div class="topbar-water-wrap">
