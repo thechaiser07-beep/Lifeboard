@@ -1823,8 +1823,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <option value="GBP">GBP</option>
         <option value="AUD">AUD</option>
       </select>
-      <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:100px">
+      <select id="subPeriod" class="fin-select">
         <option value="monthly">Monthly</option>
+        <option value="fortnightly">Fortnightly</option>
         <option value="yearly">Yearly</option>
         <option value="weekly">Weekly</option>
       </select>
@@ -2545,8 +2546,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   function monthlyEquivalent(item) {
     const a = Number(item.amount) || 0;
-    if (item.period === 'yearly') return a / 12;
-    if (item.period === 'weekly') return a * 4.345;
+    if (item.period === 'yearly')      return a / 12;
+    if (item.period === 'weekly')      return a * 4.345;
+    if (item.period === 'fortnightly') return a * 26 / 12;
     return a;
   }
   function escapeHtml(s) {
@@ -2738,9 +2740,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           it.lastDeductedAt = renewalMs;
           changed = true;
         }
-        if (it.period === 'weekly') renewalDate.setDate(renewalDate.getDate() + 7);
-        else if (it.period === 'yearly') renewalDate.setFullYear(renewalDate.getFullYear() + 1);
-        else renewalDate.setMonth(renewalDate.getMonth() + 1);
+        if (it.period === 'weekly')           renewalDate.setDate(renewalDate.getDate() + 7);
+        else if (it.period === 'fortnightly') renewalDate.setDate(renewalDate.getDate() + 14);
+        else if (it.period === 'yearly')      renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        else                                  renewalDate.setMonth(renewalDate.getMonth() + 1);
       }
       const newRenewal = renewalDate.getFullYear() + '-' + String(renewalDate.getMonth() + 1).padStart(2, '0') + '-' + String(renewalDate.getDate()).padStart(2, '0');
       if (newRenewal !== it.renewal) {
@@ -2761,7 +2764,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if (!row) return;
     const enteredCcy = it.entered_currency || 'CHF';
     const enteredAmt = it.entered_amount != null ? it.entered_amount : it.amount;
-    const periodOpts = ['monthly','yearly','weekly'].map(p =>
+    const periodOpts = ['monthly','fortnightly','yearly','weekly'].map(p =>
       '<option value="' + p + '"' + (p === it.period ? ' selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'
     ).join('');
     const ccyOpts = ['CHF','USD','EUR','GBP','AUD'].map(c =>
@@ -2784,7 +2787,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       '<input type="text" class="se-name" value="' + escapeHtml(it.name) + '" style="flex:1.5;min-width:120px;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)" />' +
       '<input type="number" step="0.01" class="se-amt" value="' + Number(enteredAmt).toFixed(2) + '" style="width:90px;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)" />' +
       '<select class="se-ccy fin-select" style="padding:7px 28px 7px 11px">' + ccyOpts + '</select>' +
-      '<select class="se-per" style="padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)">' + periodOpts + '</select>' +
+      '<select class="se-per fin-select" style="padding:7px 28px 7px 11px">' + periodOpts + '</select>' +
       '<label class="date-field" style="min-width:140px"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" class="se-ren" value="' + (it.renewal && /^\d{4}-\d{2}-\d{2}/.test(it.renewal) ? it.renewal.slice(0,10) : '') + '" /></label>' +
       '<select class="se-from" style="padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:130px">' + fromOpts + '</select>' +
       '<label class="sub-auto-toggle" style="padding:6px 10px"><input type="checkbox" class="se-auto"' + (it.autoDeduct ? ' checked' : '') + ' /><span class="sub-auto-track"><span class="sub-auto-thumb"></span></span><span class="sub-auto-label">Auto-deduct</span></label>' +
@@ -3375,9 +3378,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let safety = 0;
     while (d < today && safety++ < 600) {
-      if (period === 'weekly')      d.setDate(d.getDate() + 7);
-      else if (period === 'yearly') d.setFullYear(d.getFullYear() + 1);
-      else                          d.setMonth(d.getMonth() + 1); // monthly default
+      if (period === 'weekly')           d.setDate(d.getDate() + 7);
+      else if (period === 'fortnightly') d.setDate(d.getDate() + 14);
+      else if (period === 'yearly')      d.setFullYear(d.getFullYear() + 1);
+      else                               d.setMonth(d.getMonth() + 1);
     }
     return d;
   }
