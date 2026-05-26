@@ -556,8 +556,6 @@ body.topbar-modal-open {
     const btn = document.getElementById('topbarWaterAdd');
     if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); addWater(); });
 
-    const cogBtn = document.getElementById('topbarCog');
-    if (cogBtn) cogBtn.addEventListener('click', openSchedModal);
     const closeBtn = document.getElementById('schedClose');
     if (closeBtn) closeBtn.addEventListener('click', closeSchedModal);
     const saveBtn = document.getElementById('schedSave');
