@@ -3316,6 +3316,272 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   renderWishlist();
 
   // ============================================================
+  // TRANSACTIONS — log outflows, optionally deduct from net worth
+  // Each item: { id, name, amount (CHF), entered_amount, entered_currency,
+  //              category, date (YYYY-MM-DD), ts, deductedAt, deductedFrom }
+  // ============================================================
+  const TXN_CATS = {
+    food:      { label: 'Food & Drink',  emoji: '🍔', color: '#F97316' },
+    transport: { label: 'Transport',     emoji: '🚗', color: '#7DD3FC' },
+    shopping:  { label: 'Shopping',      emoji: '🛍️', color: '#B794F4' },
+    entertain: { label: 'Entertainment', emoji: '🎬', color: '#FBBF24' },
+    health:    { label: 'Health',        emoji: '🏥', color: '#6EE7B7' },
+    housing:   { label: 'Housing',       emoji: '🏠', color: '#94A3B8' },
+    utilities: { label: 'Utilities',     emoji: '💡', color: '#F2C063' },
+    other:     { label: 'Other',         emoji: '📦', color: '#76746E' }
+  };
+
+  function renderTransactions() {
+    const list  = document.getElementById('txnList');
+    const empty = document.getElementById('txnEmpty');
+    if (!list) return;
+
+    const items = storeGet('transactions') || [];
+    const now = new Date();
+    const thisMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    const thisYear  = String(now.getFullYear());
+
+    // Compute summary stats
+    let monthTotal = 0, ytdTotal = 0, allTotal = 0;
+    const monthCats = {};
+    items.forEach(tx => {
+      const v = Number(tx.amount) || 0;
+      const txDate = tx.date || '';
+      allTotal += v;
+      if (txDate.startsWith(thisYear))  ytdTotal  += v;
+      if (txDate.startsWith(thisMonth)) {
+        monthTotal += v;
+        const ck = tx.category || 'other';
+        monthCats[ck] = (monthCats[ck] || 0) + v;
+      }
+    });
+
+    const heroAmt      = document.getElementById('txnHeroAmt');
+    const heroMonth    = document.getElementById('txnHeroMonth');
+    const txnYtdEl     = document.getElementById('txnYtd');
+    const txnMthCount  = document.getElementById('txnMonthCount');
+    const txnTopCatEl  = document.getElementById('txnTopCat');
+    const txnAllTimeEl = document.getElementById('txnAllTime');
+
+    if (heroMonth)    heroMonth.textContent    = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+    if (heroAmt)      heroAmt.textContent      = fmtMoney(monthTotal);
+    if (txnYtdEl)     txnYtdEl.textContent     = fmtMoney(ytdTotal);
+    const mthItems = items.filter(tx => (tx.date || '').startsWith(thisMonth));
+    if (txnMthCount)  txnMthCount.textContent  = mthItems.length + (mthItems.length === 1 ? ' txn' : ' txns');
+    if (txnTopCatEl) {
+      const topKey = Object.entries(monthCats).sort((a, b) => b[1] - a[1])[0];
+      const topMeta = topKey ? TXN_CATS[topKey[0]] : null;
+      txnTopCatEl.textContent = topMeta ? topMeta.emoji + ' ' + topMeta.label : '—';
+    }
+    if (txnAllTimeEl) txnAllTimeEl.textContent = fmtMoney(allTotal);
+
+    list.innerHTML = '';
+    if (!items.length) { if (empty) empty.classList.remove('hidden'); return; }
+    if (empty) empty.classList.add('hidden');
+
+    // Group by month key YYYY-MM, sorted newest first
+    const groups = {};
+    items.forEach(tx => {
+      const mk = (tx.date || '').slice(0, 7) || 'undated';
+      if (!groups[mk]) groups[mk] = { items: [], total: 0 };
+      groups[mk].items.push(tx);
+      groups[mk].total += Number(tx.amount) || 0;
+    });
+    Object.keys(groups).sort((a, b) => b.localeCompare(a)).forEach(mk => {
+      const g = groups[mk];
+      let monthLabel = 'UNDATED';
+      if (mk !== 'undated') {
+        const [y, m] = mk.split('-');
+        monthLabel = new Date(parseInt(y), parseInt(m) - 1, 1)
+          .toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+      }
+      const header = document.createElement('div');
+      header.className = 'txn-month-header';
+      header.innerHTML =
+          '<span class="txn-month-label">' + monthLabel + '</span>'
+        + '<span class="txn-month-total">−' + fmtMoney(g.total) + '</span>';
+      list.appendChild(header);
+
+      // Newest first within the group
+      g.items.slice().sort((a, b) => {
+        const da = a.date || '', db = b.date || '';
+        if (da !== db) return db.localeCompare(da);
+        return (b.ts || 0) - (a.ts || 0);
+      }).forEach(tx => {
+        const catMeta  = TXN_CATS[tx.category] || TXN_CATS.other;
+        const isDeducted = !!tx.deductedAt;
+        const dateStr = tx.date
+          ? new Date(tx.date + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+          : '';
+
+        const footHtml = isDeducted
+          ? '<div class="txn-card-foot">'
+            + '<span class="txn-deducted-pill">Deducted from ' + escapeHtml(tx.deductedFrom && tx.deductedFrom.name ? tx.deductedFrom.name : 'account') + '</span>'
+            + '<button class="txn-deduct-undo" data-undo-id="' + tx.id + '">Undo</button>'
+            + '</div>'
+          : '<div class="txn-card-foot">'
+            + '<button class="txn-deduct-btn" data-deduct-id="' + tx.id + '">− Deduct from net worth</button>'
+            + '</div>';
+
+        const row = document.createElement('div');
+        row.className = 'txn-card';
+        row.style.borderLeftColor = catMeta.color;
+        row.innerHTML =
+            '<div class="txn-card-h">'
+          +   '<div class="txn-card-name">' + escapeHtml(tx.name) + '</div>'
+          +   '<div class="txn-card-amt">' + fmtMoney(tx.amount) + '</div>'
+          +   '<button class="txn-card-x" data-id="' + tx.id + '" aria-label="Remove">×</button>'
+          + '</div>'
+          + '<div class="txn-card-meta">'
+          +   '<span class="txn-cat-pill" style="background:' + catMeta.color + '22;color:' + catMeta.color + '">' + catMeta.emoji + ' ' + catMeta.label + '</span>'
+          +   (dateStr ? '<span class="txn-date-pill">' + dateStr + '</span>' : '')
+          +   (isDeducted && tx.deductedFrom ? '<span class="txn-from-pill">from · ' + escapeHtml(tx.deductedFrom.name) + '</span>' : '')
+          + '</div>'
+          + footHtml;
+        list.appendChild(row);
+      });
+    });
+
+    list.querySelectorAll('.txn-card-x').forEach(b => {
+      b.addEventListener('click', () => {
+        const arr = (storeGet('transactions') || []).filter(x => x.id !== b.dataset.id);
+        storeSet('transactions', arr);
+        renderTransactions();
+      });
+    });
+    list.querySelectorAll('.txn-deduct-btn').forEach(b => {
+      b.addEventListener('click', () => openTxnDeductChooser(b.dataset.deductId, b.closest('.txn-card')));
+    });
+    list.querySelectorAll('.txn-deduct-undo').forEach(b => {
+      b.addEventListener('click', () => undoTxnDeduct(b.dataset.undoId));
+    });
+  }
+
+  function openTxnDeductChooser(txnId, cardEl) {
+    if (!cardEl) return;
+    const existing = cardEl.querySelector('.ord-deduct-chooser');
+    if (existing) { existing.remove(); return; }
+    const tx = (storeGet('transactions') || []).find(x => x.id === txnId);
+    if (!tx) return;
+    const accounts = listAllNwAccounts();
+    if (!accounts.length) { alert('Add at least one net worth account before deducting.'); return; }
+    const ICONS = { bank: '🏦', stocks: '📈', crypto: '🪙', other: '💼' };
+    const cost = Number(tx.amount) || 0;
+    const optsHtml = accounts.map(a => {
+      const insuf = a.amountCHF < cost - 0.005;
+      return '<button class="ord-deduct-opt' + (insuf ? ' insufficient' : '') + '" '
+        + 'data-cat="' + a.catKey + '" data-name="' + escapeHtml(a.itemName) + '"'
+        + (insuf ? ' data-insuf="1"' : '') + '>'
+        + ICONS[a.catKey] + ' ' + escapeHtml(a.itemName)
+        + '<small>' + fmtMoney(a.amountCHF) + (insuf ? ' · not enough' : ' available') + '</small>'
+        + '</button>';
+    }).join('');
+    const chooser = document.createElement('div');
+    chooser.className = 'ord-deduct-chooser';
+    chooser.innerHTML =
+        '<div class="ord-deduct-chooser-title">Deduct ' + fmtMoney(cost) + ' from…</div>'
+      + '<div class="ord-deduct-options">' + optsHtml + '</div>'
+      + '<button class="ord-deduct-cancel" type="button">cancel</button>';
+    cardEl.appendChild(chooser);
+    chooser.querySelectorAll('.ord-deduct-opt').forEach(b => {
+      b.addEventListener('click', () => {
+        if (b.dataset.insuf === '1' && !confirm('That account doesn\'t have enough — deduct anyway?')) return;
+        confirmTxnDeduct(txnId, b.dataset.cat, b.dataset.name);
+      });
+    });
+    chooser.querySelector('.ord-deduct-cancel').addEventListener('click', () => chooser.remove());
+  }
+
+  function confirmTxnDeduct(txnId, catKey, itemName) {
+    const txns = storeGet('transactions') || [];
+    const tIdx = txns.findIndex(x => x.id === txnId);
+    if (tIdx < 0) return;
+    const tx = txns[tIdx];
+    if (tx.deductedAt) return;
+    const nwItems = storeGet('nw:' + catKey) || [];
+    const itemIdx = nwItems.findIndex(it => String(it.name) === String(itemName));
+    if (itemIdx < 0) { alert('That account no longer exists.'); return; }
+    const cost = Number(tx.amount) || 0;
+    nwItems[itemIdx].amount = (Number(nwItems[itemIdx].amount) || 0) - cost;
+    storeSet('nw:' + catKey, nwItems);
+    logActivity(catKey, nwItems[itemIdx].name, -cost, 'edit');
+    txns[tIdx] = { ...tx, deductedAt: Date.now(), deductedFrom: { cat: catKey, name: nwItems[itemIdx].name } };
+    storeSet('transactions', txns);
+    renderAllNetWorth();
+    renderTransactions();
+  }
+
+  function undoTxnDeduct(txnId) {
+    const txns = storeGet('transactions') || [];
+    const tIdx = txns.findIndex(x => x.id === txnId);
+    if (tIdx < 0) return;
+    const tx = txns[tIdx];
+    if (!tx.deductedAt || !tx.deductedFrom) return;
+    const cost = Number(tx.amount) || 0;
+    const nwItems = storeGet('nw:' + tx.deductedFrom.cat) || [];
+    const itemIdx = nwItems.findIndex(it => String(it.name) === String(tx.deductedFrom.name));
+    if (itemIdx >= 0) {
+      nwItems[itemIdx].amount = (Number(nwItems[itemIdx].amount) || 0) + cost;
+      storeSet('nw:' + tx.deductedFrom.cat, nwItems);
+      logActivity(tx.deductedFrom.cat, nwItems[itemIdx].name, cost, 'edit');
+    }
+    txns[tIdx] = { ...tx, deductedAt: null, deductedFrom: null };
+    storeSet('transactions', txns);
+    renderAllNetWorth();
+    renderTransactions();
+  }
+
+  function doTxnAdd() {
+    try {
+      const nEl   = document.getElementById('txnName');
+      const aEl   = document.getElementById('txnAmt');
+      const cEl   = document.getElementById('txnCcy');
+      const catEl = document.getElementById('txnCat');
+      const dEl   = document.getElementById('txnDate');
+      if (!nEl || !aEl) return;
+      const n    = (nEl.value || '').trim();
+      const aRaw = parseFloat(aEl.value);
+      if (!n || isNaN(aRaw) || aRaw <= 0) { nEl.focus(); return; }
+      const ccy  = cEl ? cEl.value : 'CHF';
+      const rate = exchangeRates[ccy] || 1;
+      const today = new Date();
+      const todayIso = today.getFullYear() + '-'
+        + String(today.getMonth() + 1).padStart(2, '0') + '-'
+        + String(today.getDate()).padStart(2, '0');
+      const txns = storeGet('transactions') || [];
+      txns.push({
+        id: 'tx_' + Date.now() + '_' + Math.floor(Math.random() * 9999),
+        name: n,
+        amount: aRaw / rate,
+        entered_amount: aRaw,
+        entered_currency: ccy,
+        category: catEl ? catEl.value : 'other',
+        date: (dEl && dEl.value) ? dEl.value : todayIso,
+        ts: Date.now(),
+        deductedAt: null,
+        deductedFrom: null
+      });
+      storeSet('transactions', txns);
+      nEl.value = ''; aEl.value = '';
+      renderTransactions();
+    } catch (e) { console.error('txnAdd failed', e); }
+  }
+  window.__addTxn = doTxnAdd;
+  const _txnName = document.getElementById('txnName');
+  const _txnAmt  = document.getElementById('txnAmt');
+  if (_txnName) _txnName.addEventListener('keydown', e => { if (e.key === 'Enter') doTxnAdd(); });
+  if (_txnAmt)  _txnAmt.addEventListener('keydown',  e => { if (e.key === 'Enter') doTxnAdd(); });
+  // Default the date field to today
+  const _txnDateEl = document.getElementById('txnDate');
+  if (_txnDateEl && !_txnDateEl.value) {
+    const _td = new Date();
+    _txnDateEl.value = _td.getFullYear() + '-'
+      + String(_td.getMonth() + 1).padStart(2, '0') + '-'
+      + String(_td.getDate()).padStart(2, '0');
+  }
+  renderTransactions();
+
+  // ============================================================
   // ADD-BUTTON BULLETPROOFING — three independent paths:
   //   1. inline onclick attribute (in the HTML) calls window.__addX
   //   2. document-level click delegation matches by id
