@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Finances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="topbar.js" defer></script>
 <style>
 :root {
@@ -1604,9 +1605,40 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 600px) {
   .sub-auto-toggle { width: 100%; justify-content: space-between; padding: 12px 14px; }
 }
+
+/* ===== Cloud sync indicator ===== */
+#cloudSyncDot {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top, 14px));
+  right: 16px;
+  z-index: 300;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: background 0.3s, box-shadow 0.3s;
+  pointer-events: none;
+}
+#cloudSyncDot[data-state="syncing"] {
+  background: #F2C063;
+  box-shadow: 0 0 8px rgba(242,192,99,0.7);
+  animation: cloudPulse 0.9s ease-in-out infinite;
+}
+#cloudSyncDot[data-state="ok"] {
+  background: #6BE3A4;
+  box-shadow: 0 0 8px rgba(107,227,164,0.6);
+}
+#cloudSyncDot[data-state="err"] {
+  background: #FF8A8A;
+  box-shadow: 0 0 8px rgba(255,138,138,0.6);
+}
+@keyframes cloudPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
 </style>
 </head>
 <body>
+<div id="cloudSyncDot" title="Cloud sync"></div>
 <div class="shell">
 
 <!-- ===== BACK BUTTON ===== -->
@@ -1930,15 +1962,53 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 (function() {
 
   // ============================================================
-  // STORAGE — localStorage shim. Same interface as the dashboard's
-  // storeGet/storeSet so the existing render code drops straight in.
+  // STORAGE — localStorage (immediate) + Supabase cloud sync.
+  // All finance state is bundled into a single app_state row so
+  // every device stays in sync without a per-table schema.
   // ============================================================
+  const SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_sLs1FGWDe7a_ue9md3juzw_uQUL4Csw';
+  const APP_KEY = 'finance';
+  const SYNC_KEYS = ['nw:bank','nw:stocks','nw:crypto','nw:other','nw_activity','nw_history','subs','incoming_orders','wishlist','nw_currency'];
+
+  let _supa = null;
+  let _syncTimer = null;
+
   function storeGet(key) {
     try { const raw = localStorage.getItem(key); return raw == null ? null : JSON.parse(raw); }
     catch (e) { return null; }
   }
   function storeSet(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    if (SYNC_KEYS.includes(key)) _scheduleSync();
+  }
+  function _syncBadge(state) {
+    const el = document.getElementById('cloudSyncDot');
+    if (el) el.dataset.state = state;
+  }
+  function _scheduleSync() {
+    if (!_supa) return;
+    _syncBadge('syncing');
+    if (_syncTimer) clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(_pushToCloud, 900);
+  }
+  async function _pushToCloud() {
+    if (!_supa) return;
+    const state = {};
+    SYNC_KEYS.forEach(k => { const v = storeGet(k); if (v !== null) state[k] = v; });
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/app_state?on_conflict=key', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ key: APP_KEY, data: state })
+      });
+      _syncBadge(res.ok ? 'ok' : 'err');
+    } catch (e) { _syncBadge('err'); }
   }
 
   // ============================================================
@@ -3415,6 +3485,59 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   safeRenderTicker();
   setInterval(safeRenderTicker, 1500);
+
+  // ============================================================
+  // SUPABASE INIT — pull remote state on load, hydrate localStorage,
+  // re-render with cloud data, then subscribe to realtime so changes
+  // from other devices appear instantly without a page refresh.
+  // ============================================================
+  (async function _initCloudSync() {
+    if (!window.supabase || !SUPABASE_URL || !SUPABASE_KEY) return;
+    if (SUPABASE_URL.indexOf('PASTE-') === 0 || SUPABASE_KEY.indexOf('PASTE-') === 0) return;
+    try {
+      _supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      _syncBadge('syncing');
+      const { data, error } = await _supa
+        .from('app_state').select('data').eq('key', APP_KEY).maybeSingle();
+      if (!error && data && data.data && Object.keys(data.data).length > 0) {
+        const remote = data.data;
+        let changed = false;
+        SYNC_KEYS.forEach(k => {
+          if (remote[k] !== undefined) {
+            localStorage.setItem(k, JSON.stringify(remote[k]));
+            changed = true;
+          }
+        });
+        if (changed) {
+          renderAllNetWorth();
+          renderSubs();
+          renderWishlist();
+          renderOrders();
+          safeRenderTicker();
+        }
+      }
+      _syncBadge('ok');
+
+      // Realtime — push from other devices lands here instantly
+      _supa.channel('finance-sync')
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'app_state',
+          filter: 'key=eq.' + APP_KEY
+        }, payload => {
+          const remote = (payload.new || {}).data;
+          if (!remote) return;
+          SYNC_KEYS.forEach(k => {
+            if (remote[k] !== undefined) localStorage.setItem(k, JSON.stringify(remote[k]));
+          });
+          renderAllNetWorth();
+          renderSubs();
+          renderWishlist();
+          renderOrders();
+          safeRenderTicker();
+        })
+        .subscribe();
+    } catch (e) { _syncBadge('err'); console.error('finance sync init failed', e); }
+  })();
 
 })();
 </script>
