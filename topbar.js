@@ -164,6 +164,95 @@ body.topbar-modal-open {
     overscroll-behavior: contain;
   }
 }
+
+/* ── Settings cog button ── */
+.topbar-cog {
+  flex: 0 0 auto;
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 11px;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.topbar-cog:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.12); }
+.topbar-cog:active { transform: scale(0.92); }
+
+/* ── Settings modal ── */
+.sched-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  overscroll-behavior: contain;
+}
+.sched-overlay.show { display: flex; }
+.sched-modal {
+  background: #111113;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  padding: 24px;
+  width: 280px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+}
+.sched-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.sched-modal-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.sched-modal-close {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1;
+  padding: 4px; border-radius: 6px;
+  transition: color 0.15s;
+}
+.sched-modal-close:hover { color: rgba(255,255,255,0.7); }
+.sched-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sched-row label {
+  font-size: 14px; font-weight: 500; color: #FAFAFA;
+}
+.sched-time-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 9px;
+  color: #FAFAFA;
+  font-size: 15px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 600;
+  padding: 7px 10px;
+  color-scheme: dark;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.sched-time-input:focus { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.09); }
+.sched-save-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.07));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: #FAFAFA; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sched-save-btn:hover { background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.12)); }
+.sched-save-btn:active { transform: scale(0.98); }
+@media (max-width: 480px) {
+  .sched-overlay { align-items: flex-end; }
+  .sched-modal { width: 100%; border-radius: 18px 18px 0 0; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+}
 `;
 
   // -------- HTML --------

@@ -5,5 +5,21 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "git add -A; git diff --staged --quiet; if ($LASTEXITCODE -ne 0) { git commit -m \"auto-save`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\" }; git push origin main 2>$null; exit 0",
+            "statusMessage": "Pushing to GitHub...",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
