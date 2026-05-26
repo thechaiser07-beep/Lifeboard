@@ -848,6 +848,116 @@
   .sync-dot.error    { background: var(--danger);  opacity: 1; box-shadow: 0 0 6px rgba(255,107,107,0.6); }
   @keyframes sync-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.35); } }
 
+  /* ── Custom modal ── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .modal-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: rgba(22,22,25,0.95);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 24px 64px rgba(0,0,0,0.7);
+    transform: scale(0.94) translateY(6px);
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease;
+    opacity: 0;
+  }
+
+  .modal-backdrop.is-open .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  .modal-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .modal-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  .modal-body strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal-cancel {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .modal-cancel:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-primary);
+  }
+
+  .modal-confirm {
+    flex: 1.4;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
+    color: #0A0A0B;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .modal-confirm:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
   /* ── Responsive ── */
   @media (max-width: 480px) {
     .dash-title { font-size: 22px; }
@@ -1411,19 +1521,8 @@
     return `${m}m`;
   }
 
-  function fmtAMPM(h) {
-    const raw = h % 24;
-    const hh = Math.floor(raw);
-    const mm = Math.round((raw % 1) * 60);
-    const period = hh < 12 ? 'AM' : 'PM';
-    const h12 = hh % 12 || 12;
-    return `${h12}:${String(mm).padStart(2, '0')} ${period}`;
-  }
-
   function updateDayBar() {
     const { WAKE_HOUR, SLEEP_HOUR } = getSchedule();
-    const rangeEl = document.getElementById('ringHoursRange');
-    if (rangeEl) rangeEl.textContent = `${fmtAMPM(WAKE_HOUR)} – ${fmtAMPM(SLEEP_HOUR)}`;
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
     const C = 2 * Math.PI * 52;
@@ -1455,11 +1554,11 @@
       ringPercEl.textContent = `${Math.round(pct)}%`;
 
       let phase, status;
-      if (pct < 25) {
+      if (pct < 18.75) {
         phase = 'MORNING'; status = '☀️ Morning — fresh start';
-      } else if (pct < 50) {
+      } else if (pct < 31.25) {
         phase = 'MIDDAY'; status = '⚡ Midday — keep moving';
-      } else if (pct < 75) {
+      } else if (pct < 56.25) {
         phase = 'AFTERNOON'; status = '🔥 Afternoon — push it';
       } else if (pct < 90) {
         phase = 'EVENING'; status = '⏳ Evening — wrap up';
@@ -1919,10 +2018,6 @@
     updateDayBar();
     setInterval(updateDayBar, 60 * 1000);
     window.addEventListener('dashboard-settings-changed', updateDayBar);
-
-    document.getElementById('ringCogBtn').addEventListener('click', () => {
-      if (typeof window._schedOpen === 'function') window._schedOpen();
-    });
 
     startTicker();
   })();
