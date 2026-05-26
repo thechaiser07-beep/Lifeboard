@@ -2176,6 +2176,75 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
 </div>
 
+<!-- ===== TRANSACTIONS ===== -->
+<div class="section" data-section="txn">
+  <div class="section-title">
+    <span class="section-title-text">TRANSACTIONS</span>
+  </div>
+
+  <!-- Hero summary -->
+  <div class="card txn-hero">
+    <div class="txn-hero-eyebrow" id="txnHeroMonth">THIS MONTH</div>
+    <div class="txn-hero-num" id="txnHeroAmt">CHF 0</div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05)">
+      <div class="txn-hero-grid">
+        <div class="txn-hero-stat">
+          <div class="txn-hero-label">YTD</div>
+          <div class="txn-hero-val negative" id="txnYtd">CHF 0</div>
+        </div>
+        <div class="txn-hero-stat">
+          <div class="txn-hero-label">This month</div>
+          <div class="txn-hero-val" id="txnMonthCount">0 txns</div>
+        </div>
+        <div class="txn-hero-stat">
+          <div class="txn-hero-label">Top category</div>
+          <div class="txn-hero-val" id="txnTopCat">—</div>
+        </div>
+        <div class="txn-hero-stat">
+          <div class="txn-hero-label">All time</div>
+          <div class="txn-hero-val negative" id="txnAllTime">CHF 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="card txn-add-card">
+    <div class="txn-add-eyebrow">+ LOG A TRANSACTION</div>
+    <div class="txn-add-grid">
+      <input type="text"   id="txnName" placeholder="Description (e.g. Groceries)" class="txn-input txn-input-name">
+      <input type="number" id="txnAmt"  placeholder="Amount" step="0.01" class="txn-input txn-input-amt">
+      <select id="txnCcy" class="txn-input txn-input-ccy fin-select">
+        <option value="CHF">CHF</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="AUD">AUD</option>
+      </select>
+      <select id="txnCat" class="txn-input txn-input-cat fin-select">
+        <option value="food">🍔 Food</option>
+        <option value="transport">🚗 Transport</option>
+        <option value="shopping">🛍️ Shopping</option>
+        <option value="entertain">🎬 Entertainment</option>
+        <option value="health">🏥 Health</option>
+        <option value="housing">🏠 Housing</option>
+        <option value="utilities">💡 Utilities</option>
+        <option value="other">📦 Other</option>
+      </select>
+      <label class="date-field" title="Transaction date"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="txnDate" /></label>
+      <button class="txn-add-btn" id="txnAddBtn" onclick="window.__addTxn && window.__addTxn()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- Transaction list grouped by month -->
+  <div id="txnList"></div>
+  <div class="txn-empty-card" id="txnEmpty">
+    <div class="txn-empty-icon">💸</div>
+    <div class="txn-empty-title">No transactions yet</div>
+    <div class="txn-empty-sub">Log a spend above. Each entry can optionally be deducted from your net worth to keep your balance accurate.</div>
+  </div>
+</div>
+
 </div>
 
 <!-- ===== BOTTOM TAB BAR ===== -->
