@@ -173,9 +173,7 @@
   }
 
   .goal-ticker-row.is-entering {
-    opacity: 0;
     animation: ticker-enter 0.25s ease forwards;
-    animation-delay: 0.28s;
   }
 
   @keyframes ticker-leave {
@@ -1233,9 +1231,11 @@
       stage.appendChild(newRow);
     } else {
       oldRow.classList.add('is-leaving');
-      newRow.classList.add('is-entering');
-      stage.appendChild(newRow);
-      setTimeout(() => { if (oldRow.parentNode) oldRow.remove(); }, 280);
+      setTimeout(() => {
+        if (oldRow.parentNode) oldRow.remove();
+        stage.appendChild(newRow);
+        requestAnimationFrame(() => newRow.classList.add('is-entering'));
+      }, 260);
     }
   }
 
