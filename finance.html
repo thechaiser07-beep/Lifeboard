@@ -733,8 +733,8 @@ html, body { scrollbar-width: none; -ms-overflow-style: none; }
   border-radius: 8px;
   cursor: pointer; font-weight: 600;
   appearance: none; -webkit-appearance: none;
-  text-align: center;
 }
+.ord-input-ccy { text-align: left; }
 .ord-input-from { font-size: 12px; }
 .ord-add-btn {
   padding: 0 14px;
@@ -950,7 +950,7 @@ html, body { scrollbar-width: none; -ms-overflow-style: none; }
 .wish-input-name { flex: 2; min-width: 160px; }
 .wish-input-amt  { flex: 1; min-width: 80px; max-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
 .wish-input-ccy {
-  flex: 0 1 80px;
+  flex: 0 1 90px;
   background: rgba(255,255,255,0.04);
   border-radius: 9px;
   color: var(--text-primary);
@@ -958,7 +958,6 @@ html, body { scrollbar-width: none; -ms-overflow-style: none; }
   font-weight: 600;
   cursor: pointer;
   appearance: none; -webkit-appearance: none;
-  text-align: center;
 }
 .wish-add-btn {
   padding: 0 18px;
@@ -1548,6 +1547,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   box-shadow: 0 0 6px rgba(107,227,164,0.7);
 }
 
+/* ============================================================
+   CURRENCY SELECT — consistent styled dropdown for all currency
+   pickers across Net Worth, Subs, Orders, and Wishlist.
+   ============================================================ */
+.fin-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2376746E' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center,
+    rgba(255, 255, 255, 0.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 7px 28px 7px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  min-width: 72px;
+}
+.fin-select:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.08);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23B8B6B0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fin-select:focus {
+  outline: none;
+  border-color: rgba(110, 231, 183, 0.40);
+  box-shadow: 0 0 0 2px rgba(110, 231, 183, 0.10);
+}
+.fin-select option {
+  background: #1a1a1c;
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
 .sub-from-pill {
   display: inline-flex;
   align-items: center;
@@ -1598,11 +1636,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       </div>
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:var(--text-tertiary)">CHF</span>
-        <select id="netWorthCurrency" style="background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;cursor:pointer">
+        <select id="netWorthCurrency" class="fin-select">
           <option value="CHF">CHF</option>
           <option value="USD">USD</option>
           <option value="EUR">EUR</option>
           <option value="GBP">GBP</option>
+          <option value="AUD">AUD</option>
         </select>
       </div>
     </div>
@@ -1745,11 +1784,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div class="quick-add" style="flex-wrap:wrap;gap:6px">
       <input type="text" placeholder="Service (e.g. Netflix)" id="subName" style="flex:1.5;min-width:120px" />
       <input type="number" placeholder="Amount" id="subAmount" step="0.01" style="flex:1;max-width:100px" />
-      <select id="subCurrency" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:90px">
+      <select id="subCurrency" class="fin-select">
         <option value="CHF">CHF</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
+        <option value="AUD">AUD</option>
       </select>
       <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:100px">
         <option value="monthly">Monthly</option>
@@ -1782,11 +1822,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div class="ord-add-grid">
       <input type="text"   id="ordName"   placeholder="Item (e.g. New iPhone)" class="ord-input ord-input-name">
       <input type="number" id="ordCost"   placeholder="Cost" step="0.01" class="ord-input ord-input-cost">
-      <select id="ordCurrency" class="ord-input ord-input-ccy">
+      <select id="ordCurrency" class="ord-input ord-input-ccy fin-select">
         <option value="CHF">CHF</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
+        <option value="AUD">AUD</option>
       </select>
       <select id="ordFromCat" class="ord-input ord-input-from" title="Which net worth account this comes out of">
         <option value="">No accounts yet</option>
@@ -1839,11 +1880,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div class="wish-add-row">
       <input type="text"   id="wishName"   placeholder="Item name (e.g. New iPhone Pro Max)" class="wish-input wish-input-name">
       <input type="number" id="wishAmount" placeholder="Cost" step="0.01" class="wish-input wish-input-amt">
-      <select id="wishCurrency" class="wish-input wish-input-ccy">
+      <select id="wishCurrency" class="wish-input wish-input-ccy fin-select">
         <option value="CHF">CHF</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
+        <option value="AUD">AUD</option>
       </select>
       <button class="wish-add-btn" id="wishAddBtn" onclick="window.__addWish && window.__addWish()">+ Add</button>
     </div>
@@ -1947,7 +1989,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   const netWorthTotal = document.getElementById('netWorthTotal');
   const netWorthBreakdown = document.getElementById('netWorthBreakdown');
 
-  let exchangeRates = { CHF: 1, USD: 1, EUR: 1, GBP: 1 };
+  let exchangeRates = { CHF: 1, USD: 1, EUR: 1, GBP: 1, AUD: 1 };
   async function loadExchangeRates() {
     try {
       const res = await fetch('https://open.er-api.com/v6/latest/CHF');
@@ -1957,7 +1999,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           CHF: 1,
           USD: data.rates.USD || 1,
           EUR: data.rates.EUR || 1,
-          GBP: data.rates.GBP || 1
+          GBP: data.rates.GBP || 1,
+          AUD: data.rates.AUD || 1
         };
         renderAllNetWorth();
         if (typeof renderSubs === 'function') renderSubs();
@@ -2651,7 +2694,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const periodOpts = ['monthly','yearly','weekly'].map(p =>
       '<option value="' + p + '"' + (p === it.period ? ' selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'
     ).join('');
-    const ccyOpts = ['CHF','USD','EUR','GBP'].map(c =>
+    const ccyOpts = ['CHF','USD','EUR','GBP','AUD'].map(c =>
       '<option value="' + c + '"' + (c === enteredCcy ? ' selected' : '') + '>' + c + '</option>'
     ).join('');
     // Build From-account options from the live NW accounts
@@ -2670,7 +2713,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     form.innerHTML =
       '<input type="text" class="se-name" value="' + escapeHtml(it.name) + '" style="flex:1.5;min-width:120px;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)" />' +
       '<input type="number" step="0.01" class="se-amt" value="' + Number(enteredAmt).toFixed(2) + '" style="width:90px;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)" />' +
-      '<select class="se-ccy" style="padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)">' + ccyOpts + '</select>' +
+      '<select class="se-ccy fin-select" style="padding:7px 28px 7px 11px">' + ccyOpts + '</select>' +
       '<select class="se-per" style="padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary)">' + periodOpts + '</select>' +
       '<label class="date-field" style="min-width:140px"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" class="se-ren" value="' + (it.renewal && /^\d{4}-\d{2}-\d{2}/.test(it.renewal) ? it.renewal.slice(0,10) : '') + '" /></label>' +
       '<select class="se-from" style="padding:6px 10px;border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:130px">' + fromOpts + '</select>' +
