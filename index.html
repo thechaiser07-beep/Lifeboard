@@ -873,6 +873,70 @@
 .tab[aria-current="page"] { background: rgba(255,255,255,0.10); color: #ffffff; }
 .tab-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
 
+/* ── Finance tile + hero grid ── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+.hero-grid > .card { margin-bottom: 0; }
+@media (max-width: 480px) {
+  .hero-grid { grid-template-columns: 90px 1fr; gap: 10px; }
+}
+.finance-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  border-radius: 16px;
+  padding: 20px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  transition: background 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+.finance-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(224,118,88,0.13), transparent 70%);
+  pointer-events: none;
+}
+.finance-tile:hover {
+  background: rgba(255,255,255,0.07);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 20px rgba(224,118,88,0.10);
+}
+.finance-tile:active { transform: scale(0.97); }
+.ft-icon-wrap {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  background: rgba(224,118,88,0.13);
+  border: 1px solid rgba(224,118,88,0.28);
+  display: flex; align-items: center; justify-content: center;
+  color: #E07658;
+  box-shadow: 0 0 18px rgba(224,118,88,0.20);
+  position: relative;
+}
+.ft-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
 </style>
 <script src="topbar.js" defer></script>
 </head>
@@ -900,7 +964,19 @@
     </div>
   </div>
 
-  <!-- Component 3: Day Ring -->
+  <!-- Component 3: Hero row — Finance tile + Day Ring -->
+  <div class="hero-grid">
+
+  <a class="finance-tile" href="finance.html">
+    <div class="ft-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
+        <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 01-.921.42z"/>
+        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 01-1.719-.756c-.394-.314-.546-.682-.546-1.005a.75.75 0 00-1.5 0c0 .828.398 1.612 1.11 2.178.711.566 1.66.865 2.655.921V18a.75.75 0 001.5 0v-.93c.995-.056 1.944-.355 2.655-.921.712-.566 1.11-1.35 1.11-2.178 0-.829-.398-1.613-1.11-2.178-.711-.566-1.66-.865-2.655-.921V8.334c.228.086.439.208.621.363.394.313.546.681.546 1.004a.75.75 0 001.5 0c0-.828-.398-1.612-1.11-2.178-.711-.566-1.66-.865-2.655-.921V6z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="ft-label">Finance</div>
+  </a>
+
   <div class="card day-ring-card" id="dayRingCard">
     <div class="ring-wrap">
       <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
@@ -937,6 +1013,8 @@
       <div class="ring-hours-range">8:00 AM – 12:00 AM</div>
     </div>
   </div>
+
+  </div><!-- /.hero-grid -->
 
   <!-- Component 4: To Do List -->
   <div class="section">
@@ -1803,6 +1881,7 @@
     <a class="tab" href="stack.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10.5 3.5a1.5 1.5 0 013 0V5h2.25A2.25 2.25 0 0118 7.25v.75H6v-.75A2.25 2.25 0 018.25 5H10.5V3.5zM5.25 9.5A.75.75 0 005 10.25v9A2.25 2.25 0 007.25 21.5h9.5A2.25 2.25 0 0019 19.25v-9a.75.75 0 00-.75-.75H5.75a.5.5 0 01-.5-.5z"/><rect x="5" y="9" width="14" height="2.5" rx=".75"/></svg></span>Supplement</a>
     <a class="tab" href="water.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0C19 10.5 12 2 12 2z"/></svg></span>Water</a>
     <a class="tab" href="gym.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43l-1.42-1.42-1.42 1.41 1.42 1.42-2.83 2.83-1.42-1.42-1.41 1.41 1.42 1.42L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.41-1.41 1.42 1.41 1.41-1.41-1.41-1.42 2.83-2.83 1.41 1.41 1.41-1.41-1.41-1.42z"/></svg></span>Gym</a>
+    <a class="tab" href="finance.html"><span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 01-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004zM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 01-.921.42z"/><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 01-1.719-.756c-.394-.314-.546-.682-.546-1.005a.75.75 0 00-1.5 0c0 .828.398 1.612 1.11 2.178.711.566 1.66.865 2.655.921V18a.75.75 0 001.5 0v-.93c.995-.056 1.944-.355 2.655-.921.712-.566 1.11-1.35 1.11-2.178 0-.829-.398-1.613-1.11-2.178-.711-.566-1.66-.865-2.655-.921V8.334c.228.086.439.208.621.363.394.313.546.681.546 1.004a.75.75 0 001.5 0c0-.828-.398-1.612-1.11-2.178-.711-.566-1.66-.865-2.655-.921V6z" clip-rule="evenodd"/></svg></span>Finance</a>
   </div>
 </nav>
 
