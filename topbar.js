@@ -559,6 +559,16 @@ body.topbar-modal-open {
     injectStyleAndHTML();
     const btn = document.getElementById('topbarWaterAdd');
     if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); addWater(); });
+
+    const cogBtn = document.getElementById('topbarCog');
+    if (cogBtn) cogBtn.addEventListener('click', openSchedModal);
+    const closeBtn = document.getElementById('schedClose');
+    if (closeBtn) closeBtn.addEventListener('click', closeSchedModal);
+    const saveBtn = document.getElementById('schedSave');
+    if (saveBtn) saveBtn.addEventListener('click', saveSchedSettings);
+    const overlay = document.getElementById('schedOverlay');
+    if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeSchedModal(); });
+
     render();
     lockGestures();
     startModalLock();
