@@ -1385,6 +1385,7 @@
   }
 
   function updateDayBar() {
+    const { WAKE_HOUR, SLEEP_HOUR } = getSchedule();
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
     const C = 2 * Math.PI * 52;
