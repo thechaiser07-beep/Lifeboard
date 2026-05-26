@@ -507,6 +507,8 @@ body.topbar-modal-open {
     closeSchedModal();
   }
 
+  window._schedOpen = openSchedModal;
+
   // -------- Mobile lockdown helpers --------
   // Belt-and-suspenders zoom prevention — iOS Safari sometimes ignores
   // user-scalable=no, so we also kill the gesture events directly.
