@@ -311,7 +311,10 @@ body.topbar-modal-open {
 
     const wrap = document.createElement('div');
     wrap.innerHTML = html.trim();
-    document.body.insertBefore(wrap.firstChild, document.body.firstChild);
+    // The html now includes both <header> and <div.sched-overlay> — insert both
+    const fragment = document.createDocumentFragment();
+    while (wrap.firstChild) fragment.appendChild(wrap.firstChild);
+    document.body.insertBefore(fragment, document.body.firstChild);
   }
 
   // -------- Active-date helpers (match the goals page 6 AM rollover) --------
