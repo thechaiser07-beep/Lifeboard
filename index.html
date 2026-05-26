@@ -1073,9 +1073,18 @@
 
 
 <script>
-  // ── Constants ──
-  const WAKE_HOUR  = 8;
-  const SLEEP_HOUR = 24;
+  // ── Schedule settings (editable via topbar cog) ──
+  function getSchedule() {
+    let s = {};
+    try { s = JSON.parse(localStorage.getItem('dashboard:settings')) || {}; } catch (e) {}
+    const wakeTime  = s.wakeTime  || '08:00';
+    const sleepTime = s.sleepTime || '00:00';
+    function toH(t) { const [h, m] = t.split(':').map(Number); return h + m / 60; }
+    const wakeH  = toH(wakeTime);
+    let   sleepH = toH(sleepTime);
+    if (sleepH <= wakeH) sleepH += 24; // crosses midnight
+    return { WAKE_HOUR: wakeH, SLEEP_HOUR: sleepH };
+  }
   const ANTHROPIC_API_KEY = '';
 
   const SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
