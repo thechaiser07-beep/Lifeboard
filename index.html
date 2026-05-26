@@ -1960,9 +1960,8 @@
     });
   }
 
-  // ── Push remaining ──
-  document.getElementById('gmPushBtn').addEventListener('click', () => {
-    if (!confirm('Push all unchecked goals to tomorrow?')) return;
+  // ── Push remaining (custom modal) ──
+  function doPushToTomorrow() {
     const todayKey    = `goals:${getActiveDateString()}`;
     const tomorrowKey = `goals:${getTomorrowDateString()}`;
     const todayGoals  = storeGet(todayKey) || [];
@@ -1984,6 +1983,33 @@
     window.dispatchEvent(new CustomEvent('goals-changed'));
     loadToday();
     loadTomorrow();
+  }
+
+  function openPushModal() {
+    const key = `goals:${getActiveDateString()}`;
+    const goals = storeGet(key) || [];
+    const count = goals.filter(g => !g.done).length;
+    const noun = count === 1 ? 'goal' : 'goals';
+    document.getElementById('pushModalBody').innerHTML =
+      `<strong>${count} unchecked ${noun}</strong> will be moved to tomorrow's list.`;
+    document.getElementById('pushModal').classList.add('is-open');
+  }
+
+  function closePushModal() {
+    document.getElementById('pushModal').classList.remove('is-open');
+  }
+
+  document.getElementById('gmPushBtn').addEventListener('click', openPushModal);
+  document.getElementById('pushModalCancel').addEventListener('click', closePushModal);
+  document.getElementById('pushModalConfirm').addEventListener('click', () => {
+    closePushModal();
+    doPushToTomorrow();
+  });
+  document.getElementById('pushModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closePushModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePushModal();
   });
 
   // ── Init ──
