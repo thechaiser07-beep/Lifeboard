@@ -1411,8 +1411,19 @@
     return `${m}m`;
   }
 
+  function fmtAMPM(h) {
+    const raw = h % 24;
+    const hh = Math.floor(raw);
+    const mm = Math.round((raw % 1) * 60);
+    const period = hh < 12 ? 'AM' : 'PM';
+    const h12 = hh % 12 || 12;
+    return `${h12}:${String(mm).padStart(2, '0')} ${period}`;
+  }
+
   function updateDayBar() {
     const { WAKE_HOUR, SLEEP_HOUR } = getSchedule();
+    const rangeEl = document.getElementById('ringHoursRange');
+    if (rangeEl) rangeEl.textContent = `${fmtAMPM(WAKE_HOUR)} – ${fmtAMPM(SLEEP_HOUR)}`;
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
     const C = 2 * Math.PI * 52;
