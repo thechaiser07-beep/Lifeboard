@@ -468,6 +468,45 @@ body.topbar-modal-open {
     pushWaterMergedToSupabase(state);
   }
 
+  // -------- Schedule settings --------
+  function getSchedSettings() {
+    try { return JSON.parse(localStorage.getItem('dashboard:settings')) || {}; } catch (e) { return {}; }
+  }
+
+  function hoursToTimeStr(h) {
+    const hh = Math.floor(h) % 24;
+    const mm = Math.round((h % 1) * 60);
+    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  }
+
+  function openSchedModal() {
+    const s = getSchedSettings();
+    const wakeInput = document.getElementById('schedWake');
+    const sleepInput = document.getElementById('schedSleep');
+    if (!wakeInput) return;
+    wakeInput.value = s.wakeTime || '08:00';
+    sleepInput.value = s.sleepTime || '00:00';
+    document.getElementById('schedOverlay').classList.add('show');
+    document.body.classList.add('topbar-modal-open');
+  }
+
+  function closeSchedModal() {
+    const overlay = document.getElementById('schedOverlay');
+    if (overlay) overlay.classList.remove('show');
+    document.body.classList.remove('topbar-modal-open');
+  }
+
+  function saveSchedSettings() {
+    const wakeTime = document.getElementById('schedWake').value || '08:00';
+    const sleepTime = document.getElementById('schedSleep').value || '00:00';
+    const s = getSchedSettings();
+    s.wakeTime = wakeTime;
+    s.sleepTime = sleepTime;
+    localStorage.setItem('dashboard:settings', JSON.stringify(s));
+    window.dispatchEvent(new CustomEvent('dashboard-settings-changed', { detail: s }));
+    closeSchedModal();
+  }
+
   // -------- Mobile lockdown helpers --------
   // Belt-and-suspenders zoom prevention — iOS Safari sometimes ignores
   // user-scalable=no, so we also kill the gesture events directly.
