@@ -1880,6 +1880,7 @@
 
     updateDayBar();
     setInterval(updateDayBar, 60 * 1000);
+    window.addEventListener('dashboard-settings-changed', updateDayBar);
 
     startTicker();
   })();
