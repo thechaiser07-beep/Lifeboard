@@ -2907,12 +2907,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       // Days until next renewal (rolls past dates forward by the period so
       // a "Renews Apr 28 · monthly" sub shows the *next* upcoming renewal).
       let daysToRenew = null;
+      let nextDate = null;
       if (it.renewal && typeof nextRenewalDate === 'function') {
-        const next = nextRenewalDate(it.renewal, it.period);
-        if (next) {
+        nextDate = nextRenewalDate(it.renewal, it.period);
+        if (nextDate) {
           const now = new Date();
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-          daysToRenew = Math.round((next.getTime() - today) / 86400000);
+          daysToRenew = Math.round((nextDate.getTime() - today) / 86400000);
         }
       }
       const isUrgent = daysToRenew != null && daysToRenew <= 5;
@@ -2920,7 +2921,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       row.className = 'sub-row' + (isUrgent ? ' is-urgent' : '');
       row.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;align-items:center;padding:12px 14px;background:rgba(255,255,255,0.025);border-radius:var(--radius-md);margin-bottom:8px;gap:12px;';
       const renewLine = it.renewal
-        ? '<div class="sub-renew-line" style="font-size:10px;color:#F2C063;margin-top:3px">↻ Renews ' + formatRenewal(it.renewal) + '</div>'
+        ? '<div class="sub-renew-line" style="font-size:10px;color:#F2C063;margin-top:3px">↻ Renews ' + formatRenewal(nextDate || it.renewal) + '</div>'
         : '';
       // Linked NW account + auto-deduct toggle pills
       let metaLine = '';
