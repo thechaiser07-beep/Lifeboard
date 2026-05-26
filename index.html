@@ -1920,6 +1920,10 @@
     setInterval(updateDayBar, 60 * 1000);
     window.addEventListener('dashboard-settings-changed', updateDayBar);
 
+    document.getElementById('ringCogBtn').addEventListener('click', () => {
+      if (typeof window._schedOpen === 'function') window._schedOpen();
+    });
+
     startTicker();
   })();
 </script>
