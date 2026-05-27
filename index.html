@@ -1999,17 +1999,19 @@
     document.getElementById('pushModal').classList.remove('is-open');
   }
 
-  document.getElementById('gmPushBtn').addEventListener('click', openPushModal);
-  document.getElementById('pushModalCancel').addEventListener('click', closePushModal);
-  document.getElementById('pushModalConfirm').addEventListener('click', () => {
-    closePushModal();
-    doPushToTomorrow();
-  });
-  document.getElementById('pushModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closePushModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePushModal();
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('gmPushBtn').addEventListener('click', openPushModal);
+    document.getElementById('pushModalCancel').addEventListener('click', closePushModal);
+    document.getElementById('pushModalConfirm').addEventListener('click', () => {
+      closePushModal();
+      doPushToTomorrow();
+    });
+    document.getElementById('pushModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closePushModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePushModal();
+    });
   });
 
   // ── Init ──
