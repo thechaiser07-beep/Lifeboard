@@ -1425,16 +1425,13 @@ const CONFIG = {
     const entry = {
       id,
       dataUrl: compressed,
+      storageUrl: null,
       dateKey: wtDateKey(new Date()),
       weight: photoCurrentWeight()
     };
     photos.unshift(entry);
     if (!photosSave()) {
-      // Storage was full even after compression — try once more at lower
-      // quality before giving up.
-      try {
-        entry.dataUrl = await compressPhotoDataUrl(dataUrl, 800, 0.6);
-      } catch {}
+      try { entry.dataUrl = await compressPhotoDataUrl(dataUrl, 800, 0.6); } catch {}
       if (!photosSave()) {
         photos.shift();
         alert('Phone storage is full — delete some older progress photos before adding a new one.');
@@ -1442,6 +1439,26 @@ const CONFIG = {
       }
     }
     photosRender();
+    // Upload to Supabase Storage (progress-photos bucket) so the photo
+    // syncs to every device. Once uploaded, we strip the local blob and
+    // save again so the sync row stays small.
+    if (pcSupa) {
+      try {
+        const blob = dataUrlToBlob(compressed);
+        const path = APP_KEY + '/' + id + '.jpg';
+        const { error } = await pcSupa.storage
+          .from('progress-photos')
+          .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+        if (!error) {
+          const { data: urlData } = pcSupa.storage
+            .from('progress-photos')
+            .getPublicUrl(path);
+          entry.storageUrl = urlData.publicUrl;
+          delete entry.dataUrl;
+          photosSave();
+        }
+      } catch (_) {}
+    }
   }
   function fileToPhoto(file) {
     const r = new FileReader();
