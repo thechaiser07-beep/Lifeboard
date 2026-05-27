@@ -589,6 +589,11 @@ body.topbar-modal-open {
     const overlay = document.getElementById('schedOverlay');
     if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeSchedModal(); });
 
+    // Wire any page-level cog buttons that open the schedule modal
+    document.querySelectorAll('#ringCogBtn, .sched-cog-trigger').forEach(el => {
+      el.addEventListener('click', openSchedModal);
+    });
+
     render();
     lockGestures();
     startModalLock();
