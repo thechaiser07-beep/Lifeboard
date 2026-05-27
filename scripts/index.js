@@ -787,9 +787,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const cogBtn = document.getElementById('ringCogBtn');
-    if (cogBtn) cogBtn.addEventListener('click', () => window._schedOpen && window._schedOpen());
-
     document.getElementById('gmPushBtn').addEventListener('click', openPushModal);
     document.getElementById('pushModalCancel').addEventListener('click', closePushModal);
     document.getElementById('pushModalConfirm').addEventListener('click', () => {
