@@ -1640,10 +1640,17 @@ const CONFIG = {
       }, 3000);
       return;
     }
-    photos = photos.filter(p => p.id !== activePhotoId);
+    const deletedId = activePhotoId;
+    const deletedPhoto = photos.find(p => p.id === deletedId);
+    photos = photos.filter(p => p.id !== deletedId);
     photosSave();
     photosRender();
     closePhoto();
+    if (pcSupa && deletedPhoto && deletedPhoto.storageUrl) {
+      pcSupa.storage.from('progress-photos')
+        .remove([APP_KEY + '/' + deletedId + '.jpg'])
+        .catch(() => {});
+    }
   }
 
   $('wtViewerClose').addEventListener('click', closePhoto);
