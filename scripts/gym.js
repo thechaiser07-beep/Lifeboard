@@ -1665,8 +1665,6 @@ const CONFIG = {
   // If you leave the placeholders unchanged the app still works,
   // just only on this device (data stays in your browser).
   // ============================================================
-  const SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_sLs1FGWDe7a_ue9md3juzw_uQUL4Csw';
   const APP_KEY = 'po-coach';
   const PC_SYNCED_KEYS = ['po_coach_v1', 'po_coach_workout_done', 'po_coach_weights', 'po_coach_photos'];
 

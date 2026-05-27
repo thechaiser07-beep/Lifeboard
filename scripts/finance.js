@@ -6,8 +6,6 @@
   // All finance state is bundled into a single app_state row so
   // every device stays in sync without a per-table schema.
   // ============================================================
-  const SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_sLs1FGWDe7a_ue9md3juzw_uQUL4Csw';
   const APP_KEY = 'finance';
   const SYNC_KEYS = ['nw:bank','nw:stocks','nw:crypto','nw:other','nw_activity','nw_history','subs','incoming_orders','wishlist','nw_currency','transactions'];
 

@@ -14,8 +14,6 @@
   // -------- Supabase config (same project as the rest of the dashboard) --------
   // For your audience's standalone, replace these with placeholders
   // and have them paste their own values, just like the other pages.
-  const TOPBAR_SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
-  const TOPBAR_SUPABASE_KEY = 'sb_publishable_sLs1FGWDe7a_ue9md3juzw_uQUL4Csw';
 
   // -------- CSS --------
   const css = `
@@ -427,11 +425,11 @@ body.topbar-modal-open {
     if (window.location.pathname.endsWith('/water.html') ||
         window.location.pathname.endsWith('water.html')) return;
 
-    if (!window.supabase || !TOPBAR_SUPABASE_URL || !TOPBAR_SUPABASE_KEY) return;
-    if (TOPBAR_SUPABASE_URL.indexOf('PASTE-') === 0) return;
+    if (!window.supabase || !SUPABASE_URL || !SUPABASE_KEY) return;
+    if (SUPABASE_URL.indexOf('PASTE-') === 0) return;
 
     try {
-      const supa = window.supabase.createClient(TOPBAR_SUPABASE_URL, TOPBAR_SUPABASE_KEY);
+      const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const { data } = await supa
         .from('app_state').select('data').eq('key', 'water-coach').maybeSingle();
       const current = (data && data.data) || {};

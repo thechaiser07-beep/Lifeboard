@@ -501,8 +501,6 @@ const CONFIG = {
 
 // ── Supabase cross-device sync ────────────────────────────────────────────────
 (function() {
-  const SUPABASE_URL = 'https://uaqhwvtxmzaorfjackpa.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_sLs1FGWDe7a_ue9md3juzw_uQUL4Csw';
   const APP_KEY = 'water-coach';
   const LS_KEY  = 'po_water_v1';
 
