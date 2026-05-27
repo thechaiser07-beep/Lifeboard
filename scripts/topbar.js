@@ -592,6 +592,7 @@ body.topbar-modal-open {
     render();
     lockGestures();
     startModalLock();
+    pullSchedFromSupabase();
 
     // Re-render when localStorage changes from another tab/window OR when
     // the page becomes visible (sync may have pulled in the background).
