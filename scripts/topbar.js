@@ -496,7 +496,35 @@ body.topbar-modal-open {
     s.sleepTime = sleepTime;
     localStorage.setItem('dashboard:settings', JSON.stringify(s));
     window.dispatchEvent(new CustomEvent('dashboard-settings-changed', { detail: s }));
+    pushSchedToSupabase(s);
     closeSchedModal();
+  }
+
+  // -------- Schedule settings — Supabase sync --------
+  let _schedSupa = null;
+  function getSchedSupa() {
+    if (!_schedSupa && window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+      _schedSupa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+    return _schedSupa;
+  }
+  async function pushSchedToSupabase(settings) {
+    const supa = getSchedSupa();
+    if (!supa) return;
+    try {
+      await supa.from('kv').upsert({ key: 'dashboard:settings', value: settings, updated_at: new Date().toISOString() });
+    } catch (e) {}
+  }
+  async function pullSchedFromSupabase() {
+    const supa = getSchedSupa();
+    if (!supa) return;
+    try {
+      const { data } = await supa.from('kv').select('value').eq('key', 'dashboard:settings').maybeSingle();
+      if (data && data.value) {
+        localStorage.setItem('dashboard:settings', JSON.stringify(data.value));
+        window.dispatchEvent(new CustomEvent('dashboard-settings-changed', { detail: data.value }));
+      }
+    } catch (e) {}
   }
 
   window._schedOpen = openSchedModal;
