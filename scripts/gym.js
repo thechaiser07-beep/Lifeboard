@@ -1593,8 +1593,8 @@ const CONFIG = {
     if (!A || !B) return;
     activePhotoId = activeId;
     comparePhotoId = otherId;
-    $('wtCmpImgA').src = A.dataUrl;
-    $('wtCmpImgB').src = B.dataUrl;
+    $('wtCmpImgA').src = A.storageUrl || A.dataUrl;
+    $('wtCmpImgB').src = B.storageUrl || B.dataUrl;
     $('wtCmpMetaA').textContent = photoFmtDate(A.dateKey) + ' · ' + (A.weight || '—');
     $('wtCmpMetaB').textContent = photoFmtDate(B.dateKey) + ' · ' + (B.weight || '—');
     // Headline — date arrow + weight delta
