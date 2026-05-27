@@ -1543,7 +1543,7 @@ const CONFIG = {
     const p = photos.find(x => x.id === id);
     if (!p) return;
     activePhotoId = id;
-    $('wtViewerImg').src = p.dataUrl;
+    $('wtViewerImg').src = p.storageUrl || p.dataUrl;
     $('wtViewerDate').textContent = photoFmtDate(p.dateKey).toUpperCase();
     $('wtViewerWeight').textContent = p.weight || '—';
     $('wtViewer').dataset.mode = 'single';
