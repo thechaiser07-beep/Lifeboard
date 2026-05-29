@@ -251,9 +251,10 @@
     renderNetWorthChart();
     renderAllocationDonut(sliceTotals, grand);
     renderActivity();
-    if (typeof renderWishlist === 'function') renderWishlist();
-    if (typeof renderOrders   === 'function') renderOrders();
-    if (typeof updateOrdPreview === 'function') updateOrdPreview();
+    if (typeof renderWishlist         === 'function') renderWishlist();
+    if (typeof renderWishlistCombined === 'function') renderWishlistCombined();
+    if (typeof renderOrders           === 'function') renderOrders();
+    if (typeof updateOrdPreview       === 'function') updateOrdPreview();
   }
 
   // ============================================================
