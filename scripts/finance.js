@@ -848,7 +848,7 @@
     const periodOpts = ['monthly','fortnightly','yearly','weekly'].map(p =>
       '<option value="' + p + '"' + (p === it.period ? ' selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'
     ).join('');
-    const ccyOpts = ['CHF','USD','EUR','GBP','AUD'].map(c =>
+    const ccyOpts = ['AUD','USD','NZD','GBP','EUR','CHF'].map(c =>
       '<option value="' + c + '"' + (c === enteredCcy ? ' selected' : '') + '>' + c + '</option>'
     ).join('');
     // Build From-account options from the live NW accounts
