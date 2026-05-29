@@ -98,23 +98,56 @@
   const netWorthTotal = document.getElementById('netWorthTotal');
   const netWorthBreakdown = document.getElementById('netWorthBreakdown');
 
-  let exchangeRates = { CHF: 1, USD: 1, EUR: 1, GBP: 1, AUD: 1 };
+  // AUD is the internal storage base. All amounts are stored in AUD.
+  let exchangeRates = { AUD: 1, USD: 1, NZD: 1, GBP: 1, EUR: 1, CHF: 1 };
   async function loadExchangeRates() {
     try {
-      const res = await fetch('https://open.er-api.com/v6/latest/CHF');
+      const res = await fetch('https://open.er-api.com/v6/latest/AUD');
       const data = await res.json();
       if (data && data.rates) {
         exchangeRates = {
-          CHF: 1,
+          AUD: 1,
           USD: data.rates.USD || 1,
-          EUR: data.rates.EUR || 1,
+          NZD: data.rates.NZD || 1,
           GBP: data.rates.GBP || 1,
-          AUD: data.rates.AUD || 1
+          EUR: data.rates.EUR || 1,
+          CHF: data.rates.CHF || 1
         };
+        // One-time migration: old data was stored in CHF; convert to AUD base
+        if (!storeGet('aud_base_v1')) {
+          const hasData = (storeGet('nw:bank') || []).length
+            || (storeGet('nw:stocks') || []).length
+            || (storeGet('transactions') || []).length;
+          if (hasData && exchangeRates.CHF < 1) {
+            _migrateChfToAud(exchangeRates.CHF);
+          }
+          storeSet('aud_base_v1', true);
+        }
         renderAllNetWorth();
         if (typeof renderSubs === 'function') renderSubs();
       }
     } catch (e) {}
+  }
+
+  function _migrateChfToAud(chfPerAud) {
+    const f = 1 / chfPerAud; // e.g. 1/0.59 ≈ 1.69 — multiply stored CHF to get AUD
+    const scaleArr = (key, fields) => {
+      const arr = storeGet(key) || [];
+      if (!arr.length) return;
+      arr.forEach(item => fields.forEach(fld => { item[fld] = (Number(item[fld]) || 0) * f; }));
+      storeSet(key, arr);
+    };
+    ['bank','stocks','crypto','other'].forEach(k => scaleArr('nw:' + k, ['amount']));
+    const hist = storeGet('nw:history') || [];
+    if (hist.length) { hist.forEach(h => { h.v = (Number(h.v) || 0) * f; }); storeSet('nw:history', hist); }
+    const act = storeGet('nw:activity') || [];
+    if (act.length) { act.forEach(a => { a.delta = (Number(a.delta) || 0) * f; }); storeSet('nw:activity', act); }
+    scaleArr('subs',            ['amount']);
+    scaleArr('wishlist',        ['amount']);
+    scaleArr('incoming_orders', ['amount']);
+    scaleArr('transactions',    ['amount']);
+    scaleArr('budgets',         ['limit']);
+    scaleArr('goals',           ['target', 'saved']);
   }
   loadExchangeRates();
 
