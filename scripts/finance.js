@@ -155,7 +155,7 @@
     const symbol = currencyEl ? currencyEl.value : 'AUD';
     const rate = exchangeRates[symbol] || 1;
     const num = (Number(amount) || 0) * rate;
-    return symbol + ' ' + num.toLocaleString('en-US', { minimumFractionDigits: num % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+    return symbol + ' ' + num.toLocaleString('en-AU', { minimumFractionDigits: num % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
   }
 
   function renderNetWorthCategory(cat) {
@@ -309,7 +309,7 @@
     const yesterday = today - 86400000;
     const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     if (dayStart === today) {
-      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
     }
     if (dayStart === yesterday) return 'yest';
     const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -643,7 +643,7 @@
     const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const diffDays = Math.round((dayStart - todayStart) / (1000 * 60 * 60 * 24));
-    const dateLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const dateLabel = d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric' });
     let prefix = '';
     if (diffDays < 0) prefix = 'past · ';
     else if (diffDays === 0) prefix = 'today · ';
@@ -715,7 +715,7 @@
       cost.style.cssText = 'text-align:right;line-height:1.1';
       const bigNum = fmtMoney(m);
       const origHint = (it.entered_currency && it.entered_currency !== 'CHF' && it.entered_amount != null)
-        ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">billed ' + it.entered_currency + ' ' + Number(it.entered_amount).toLocaleString('en-US', { minimumFractionDigits: it.entered_amount % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }) + ' / ' + it.period + '</div>'
+        ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">billed ' + it.entered_currency + ' ' + Number(it.entered_amount).toLocaleString('en-AU', { minimumFractionDigits: it.entered_amount % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }) + ' / ' + it.period + '</div>'
         : (it.period !== 'monthly'
             ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">billed ' + fmtMoney(it.amount) + ' / ' + it.period + '</div>'
             : '');
@@ -1033,7 +1033,7 @@
           '<div class="wish-row-h">'
         + '<div class="wish-row-info">'
         +   '<div class="wish-row-name">' + escapeHtml(it.name) + '</div>'
-        +   '<div class="wish-row-meta">' + (it.entered_currency || 'CHF') + ' ' + Number(it.entered_amount != null ? it.entered_amount : it.amount).toLocaleString('en-US', {maximumFractionDigits: 2}) + ' · added ' + fmtActivityDate(it.ts || Date.now()) + '</div>'
+        +   '<div class="wish-row-meta">' + (it.entered_currency || 'CHF') + ' ' + Number(it.entered_amount != null ? it.entered_amount : it.amount).toLocaleString('en-AU', {maximumFractionDigits: 2}) + ' · added ' + fmtActivityDate(it.ts || Date.now()) + '</div>'
         + '</div>'
         + '<div class="wish-row-amt-wrap">'
         +   '<div class="wish-row-amt">' + fmtMoney(cost) + '</div>'
@@ -1180,7 +1180,7 @@
         const daysLeft = Math.ceil((dl - new Date()) / 86400000);
         deadlineHtml = '<div class="wl-deadline' + (daysLeft < 0 ? ' overdue' : daysLeft <= 7 ? ' soon' : '') + '">📅 '
           + (daysLeft < 0 ? 'Overdue' : daysLeft === 0 ? 'Due today'
-             : daysLeft + 'd left · ' + dl.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+             : daysLeft + 'd left · ' + dl.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' }))
           + '</div>';
       }
 
@@ -1400,7 +1400,7 @@
     ytdTotal   = ytdExpense;
     allTotal   = items.filter(tx => tx.type !== 'income').reduce((s, tx) => s + (Number(tx.amount) || 0), 0);
 
-    if (heroMonth)    heroMonth.textContent    = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+    if (heroMonth)    heroMonth.textContent    = now.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }).toUpperCase();
     if (heroAmt)      heroAmt.textContent      = fmtMoney(monthExpense);
     if (txnYtdEl)     txnYtdEl.textContent     = fmtMoney(ytdExpense);
     const mthItems = items.filter(tx => (tx.date || '').startsWith(thisMonth));
@@ -1430,7 +1430,7 @@
       if (mk !== 'undated') {
         const [y, m] = mk.split('-');
         monthLabel = new Date(parseInt(y), parseInt(m) - 1, 1)
-          .toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+          .toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }).toUpperCase();
       }
       const header = document.createElement('div');
       header.className = 'txn-month-header';
@@ -1449,7 +1449,7 @@
         const isIncome = (tx.type === 'income');
         const isDeducted = !!tx.deductedAt && !isIncome;
         const dateStr = tx.date
-          ? new Date(tx.date + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+          ? new Date(tx.date + 'T00:00').toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric' })
           : '';
 
         const footHtml = isIncome
@@ -1675,7 +1675,7 @@
     const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const diffDays = Math.round((dayStart - todayStart) / 86400000);
-    const dateLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const dateLabel = d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric' });
     let cls = '', prefix = '';
     if (diffDays < 0)        { cls = 'past';  prefix = 'late · '; }
     else if (diffDays === 0) { cls = 'today'; prefix = 'today · '; }
@@ -2881,7 +2881,7 @@
       if (_calSelectedDay && byDate[_calSelectedDay]) {
         detail.style.display = '';
         const dp = new Date(_calSelectedDay + 'T00:00');
-        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
         if (detailList) {
           detailList.innerHTML = byDate[_calSelectedDay].list.map(tx => {
             const isInc = tx.type === 'income';
@@ -2896,7 +2896,7 @@
       } else if (_calSelectedDay) {
         detail.style.display = '';
         const dp = new Date(_calSelectedDay + 'T00:00');
-        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
         if (detailList) detailList.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0">No transactions on this day.</div>';
       } else {
         detail.style.display = 'none';
