@@ -2728,7 +2728,7 @@
         + '<input class="fin-modal-input" id="goalModalName" type="text" value="' + escapeHtml(g ? g.name : '') + '" placeholder="e.g. Japan trip">'
         + '</div>'
         + '<div class="fin-modal-field">'
-        + '<label class="fin-modal-label">Target amount (CHF)</label>'
+        + '<label class="fin-modal-label">Target amount (AUD)</label>'
         + '<input class="fin-modal-input" id="goalModalTarget" type="number" step="0.01" value="' + (g ? g.target : '') + '" placeholder="0.00">'
         + '</div>'
         + '<div class="fin-modal-field">'
