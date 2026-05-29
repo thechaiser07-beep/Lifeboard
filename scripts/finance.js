@@ -842,7 +842,7 @@
     const rows = subsList.querySelectorAll('.sub-row');
     const row = rows[idx];
     if (!row) return;
-    const enteredCcy = it.entered_currency || 'CHF';
+    const enteredCcy = it.entered_currency || 'AUD';
     const enteredAmt = it.entered_amount != null ? it.entered_amount : it.amount;
     const periodOpts = ['monthly','fortnightly','yearly','weekly'].map(p =>
       '<option value="' + p + '"' + (p === it.period ? ' selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'
