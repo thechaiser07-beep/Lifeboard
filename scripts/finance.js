@@ -2559,7 +2559,7 @@
         + '<input class="fin-modal-input" id="bgtModalCat" type="text" value="' + escapeHtml(b ? b.category : '') + '" placeholder="e.g. Food">'
         + '</div>'
         + '<div class="fin-modal-field">'
-        + '<label class="fin-modal-label">Monthly limit (CHF)</label>'
+        + '<label class="fin-modal-label">Monthly limit (AUD)</label>'
         + '<input class="fin-modal-input" id="bgtModalLimit" type="number" step="0.01" value="' + (b ? b.limit : '') + '" placeholder="0.00">'
         + '</div>',
       [
