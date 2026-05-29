@@ -1840,7 +1840,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    ============================================================ */
 .bottom-tabs {
   overflow-x: auto !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   flex-wrap: nowrap !important;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none !important;
