@@ -154,6 +154,14 @@
       });
       row.appendChild(name); row.appendChild(amt); row.appendChild(del);
       list.appendChild(row);
+      // Show reserved amount from wishlist items linked to this account
+      const reserved = getReservedCHF(cat.key, it.name);
+      if (reserved > 0) {
+        const resRow = document.createElement('div');
+        resRow.className = 'nw-reserved-row';
+        resRow.innerHTML = '<span class="nw-reserved-label">🔒 Reserved</span><span class="nw-reserved-amt">' + fmtMoney(reserved) + '</span>';
+        list.appendChild(resRow);
+      }
     });
     document.getElementById(cat.totalId).textContent = fmtMoney(total);
     return total;
