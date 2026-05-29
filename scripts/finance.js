@@ -2646,6 +2646,45 @@
       listEl.appendChild(card);
     });
 
+    listEl.querySelectorAll('.bgt-view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card  = btn.closest('.bgt-card');
+        const panel = card ? card.querySelector('.bgt-txn-panel') : null;
+        if (!panel) return;
+        const isOpen = panel.style.display !== 'none';
+        // Collapse all panels first
+        listEl.querySelectorAll('.bgt-txn-panel').forEach(p => { p.style.display = 'none'; });
+        listEl.querySelectorAll('.bgt-view-btn').forEach(b => { b.textContent = '↓ Transactions'; });
+        if (!isOpen) {
+          panel.style.display = '';
+          btn.textContent = '↑ Hide';
+          const cat = panel.dataset.bgtCat;
+          const txns = (storeGet('transactions') || [])
+            .filter(tx => (tx.date || '').startsWith(monthKey) && tx.type !== 'income'
+              && (tx.category || 'other') === cat)
+            .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+          if (!txns.length) {
+            panel.innerHTML = '<div class="bgt-txn-empty">No transactions logged for this category this month.</div>';
+            return;
+          }
+          const TXN_CATS2 = {
+            food:'🍔', transport:'🚗', shopping:'🛍️', entertain:'🎬',
+            health:'🏥', housing:'🏠', utilities:'💡', other:'📦'
+          };
+          panel.innerHTML = txns.map(tx => {
+            const dateStr = tx.date
+              ? new Date(tx.date + 'T00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+              : '';
+            return '<div class="bgt-txn-row">'
+              + '<span class="bgt-txn-date">' + dateStr + '</span>'
+              + '<span class="bgt-txn-name">' + escapeHtml(tx.name || '') + '</span>'
+              + '<span class="bgt-txn-amt">−' + fmtMoney(tx.amount) + '</span>'
+              + '</div>';
+          }).join('');
+        }
+      });
+    });
+
     listEl.querySelectorAll('.bgt-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const i = parseInt(btn.dataset.bgtIdx, 10);
