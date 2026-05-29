@@ -1915,14 +1915,13 @@
     try {
       const nEl = document.getElementById('ordName');
       const aEl = document.getElementById('ordCost');
-      const cEl = document.getElementById('ordCurrency');
       const fEl = document.getElementById('ordFromCat');
       const dEl = document.getElementById('ordArrival');
       if (!nEl || !aEl) return;
       const n = (nEl.value || '').trim();
       const aRaw = parseFloat(aEl.value);
       if (!n || isNaN(aRaw)) { nEl.focus(); return; }
-      const ccy = cEl ? cEl.value : 'CHF';
+      const ccy = currencyEl ? currencyEl.value : 'AUD';
       const rate = exchangeRates[ccy] || 1;
       const amountCHF = aRaw / rate;
       const parsed = parseFromValue(fEl ? fEl.value : '');
