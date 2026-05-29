@@ -880,7 +880,6 @@
     try {
       const nEl = document.getElementById('subName');
       const aEl = document.getElementById('subAmount');
-      const ccEl = document.getElementById('subCurrency');
       const pEl = document.getElementById('subPeriod');
       const rEl = document.getElementById('subRenewal');
       const fEl = document.getElementById('subFromCat');
@@ -889,7 +888,7 @@
       const n = (nEl.value || '').trim();
       const aRaw = parseFloat(aEl.value);
       if (!n || isNaN(aRaw)) { nEl.focus(); return; }
-      const enteredCcy = ccEl ? ccEl.value : 'CHF';
+      const enteredCcy = currencyEl ? currencyEl.value : 'AUD';
       const rate = exchangeRates[enteredCcy] || 1;
       const amountCHF = aRaw / rate;
       // Parse "From" selection — value is "catKey::accountName"
