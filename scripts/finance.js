@@ -1267,14 +1267,13 @@
     try {
       const nEl = document.getElementById('wlName');
       const aEl = document.getElementById('wlAmount');
-      const cEl = document.getElementById('wlCurrency');
       const fEl = document.getElementById('wlFromAcct');
       const dEl = document.getElementById('wlDeadline');
       if (!nEl || !aEl) return;
       const n = (nEl.value || '').trim();
       const aRaw = parseFloat(aEl.value);
       if (!n || isNaN(aRaw)) { nEl.focus(); return; }
-      const ccy = cEl ? cEl.value : 'AUD';
+      const ccy = currencyEl ? currencyEl.value : 'AUD';
       const rate = exchangeRates[ccy] || 1;
       const amountCHF = aRaw / rate;
       let linkedCat = null, linkedAccount = null;
