@@ -2406,3 +2406,132 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transition: background 0.15s;
 }
 .ovw-bank-split-close:hover { background: rgba(255,255,255,0.04); }
+
+/* ============================================================
+   WISHLIST COMBINED — unified wishes + goals
+   ============================================================ */
+.wl-add-row {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 4px; background: rgba(0,0,0,0.30); border-radius: 12px;
+}
+.wl-card {
+  background: rgba(255,255,255,0.025); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.wl-card:hover { background: rgba(255,255,255,0.04); }
+.wl-card-h {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 10px; align-items: start; margin-bottom: 8px;
+}
+.wl-card-name {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wl-card-amt-wrap { text-align: right; }
+.wl-card-amt {
+  font-size: 15px; font-weight: 700;
+  font-variant-numeric: tabular-nums; font-family: var(--font-mono);
+  color: var(--text-primary); white-space: nowrap;
+}
+.wl-goal-of { font-size: 10px; color: var(--text-tertiary); font-weight: 500; }
+.wl-card-pct {
+  font-size: 10px; font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums; margin-top: 2px;
+  color: var(--text-tertiary);
+}
+.wl-card-pct.good { color: #6BE3A4; }
+.wl-card-pct.warn { color: #F2C063; }
+.wl-card-pct.bad  { color: #FF8A8A; }
+.wl-del, .wl-del-goal {
+  background: transparent; border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-tertiary); border-radius: 6px;
+  width: 24px; height: 24px; padding: 0; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.wl-del:hover, .wl-del-goal:hover { background: rgba(255,138,138,0.12); color: #FF8A8A; border-color: rgba(255,138,138,0.25); }
+
+.wl-card-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; align-items: center; }
+.wl-linked {
+  font-size: 12px; color: var(--text-secondary); font-weight: 600;
+  display: flex; align-items: center; gap: 5px;
+}
+.wl-reserved-pill {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(125,211,252,0.12); color: #7DD3FC;
+  font-family: var(--font-mono);
+}
+.wl-deadline {
+  font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono);
+}
+.wl-deadline.soon { color: #F2C063; }
+.wl-deadline.overdue { color: #FF8A8A; }
+
+.wl-card-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+.wl-card-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.wl-card-bar-fill.good { background: #6BE3A4; }
+.wl-card-bar-fill.warn { background: #F2C063; }
+.wl-card-bar-fill.bad  { background: #FF8A8A; }
+.wl-card-bar-fill.flat { background: rgba(255,255,255,0.15); }
+
+.wl-card-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.wl-buy-btn {
+  padding: 7px 14px;
+  background: rgba(107,227,164,0.10); border: 1px solid rgba(107,227,164,0.25);
+  color: #6BE3A4; border-radius: 8px;
+  font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: background 0.15s; white-space: nowrap;
+}
+.wl-buy-btn:hover { background: rgba(107,227,164,0.20); }
+.wl-buy-btn.insufficient {
+  background: transparent; border-color: rgba(255,255,255,0.08);
+  color: var(--text-tertiary); cursor: default;
+}
+
+.wl-goal-card .wl-card-foot {
+  padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 4px;
+}
+.wl-goal-contribute {
+  padding: 6px 12px;
+  background: rgba(107,227,164,0.08); border: 1px solid rgba(107,227,164,0.20);
+  color: #6BE3A4; border-radius: 7px;
+  font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: background 0.15s;
+}
+.wl-goal-contribute:hover { background: rgba(107,227,164,0.18); }
+.wl-goal-edit {
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-tertiary); border-radius: 7px;
+  font-family: inherit; font-size: 11px; cursor: pointer;
+  transition: background 0.15s;
+}
+.wl-goal-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.wl-done-badge {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #6BE3A4; font-family: var(--font-mono);
+}
+
+.wl-section-divider {
+  font-size: 9.5px; letter-spacing: 0.18em; font-weight: 800;
+  text-transform: uppercase; color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  padding: 16px 0 8px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 4px;
+}
+
+/* Net Worth — reserved indicator under each account */
+.nw-reserved-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 28px 7px 18px; font-size: 10px;
+  color: var(--text-tertiary); font-family: var(--font-mono);
+}
+.nw-reserved-label { display: flex; align-items: center; gap: 4px; letter-spacing: 0.04em; }
+.nw-reserved-amt { font-variant-numeric: tabular-nums; color: #7DD3FC; font-weight: 700; }
+
+@media (max-width: 600px) {
+  .wl-add-row { gap: 8px; padding: 8px; }
+  .wl-add-row .wish-input, .wl-add-row .wish-add-btn { padding: 11px 12px !important; font-size: 15px !important; }
+}
