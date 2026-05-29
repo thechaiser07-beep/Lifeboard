@@ -1982,6 +1982,27 @@
       }
     }
 
+    const bankSection = document.getElementById('ovwBankSection');
+    const bankList = document.getElementById('ovwBankList');
+    if (bankSection && bankList) {
+      const bankItems = storeGet('nw:bank') || [];
+      if (bankItems.length) {
+        bankSection.style.display = '';
+        const bankTotal = bankItems.reduce((s, it) => s + (Number(it.amount) || 0), 0);
+        bankList.innerHTML = bankItems.map(it => {
+          const v = Number(it.amount) || 0;
+          const pct = bankTotal > 0 ? Math.round(v / bankTotal * 100) : 0;
+          return '<div class="ovw-cat-row">'
+            + '<div class="ovw-cat-name">🏦 ' + escapeHtml(it.name) + '</div>'
+            + '<div class="ovw-cat-bar-wrap"><div class="ovw-cat-bar-fill" style="width:' + pct + '%;background:#7DD3FC"></div></div>'
+            + '<div class="ovw-cat-amt">' + fmtMoney(v) + '</div>'
+            + '</div>';
+        }).join('');
+      } else {
+        bankSection.style.display = 'none';
+      }
+    }
+
     const catSection = document.getElementById('ovwCatSection');
     const catList = document.getElementById('ovwCatList');
     if (catSection && catList) {
