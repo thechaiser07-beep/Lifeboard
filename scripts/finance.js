@@ -2638,9 +2638,11 @@
         + '</div>'
         + '<div class="bgt-bar-wrap"><div class="bgt-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
         + '<div class="bgt-card-actions">'
+        +   '<button class="bgt-view-btn" data-bgt-idx="' + idx + '">↓ Transactions</button>'
         +   '<button class="bgt-edit-btn" data-bgt-idx="' + idx + '">✏ Edit</button>'
-        +   '<button class="bgt-del-btn" data-bgt-idx="' + idx + '">× Delete</button>'
-        + '</div>';
+        +   '<button class="bgt-del-btn"  data-bgt-idx="' + idx + '">× Delete</button>'
+        + '</div>'
+        + '<div class="bgt-txn-panel" data-bgt-cat="' + escapeHtml(b.category) + '" style="display:none"></div>';
       listEl.appendChild(card);
     });
 
