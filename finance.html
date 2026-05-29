@@ -546,6 +546,15 @@
 
 </div>
 
+<!-- ===== SHARED FINANCE MODAL (goal contribute / budget edit) ===== -->
+<div class="fin-modal-overlay" id="finModal" style="display:none">
+  <div class="fin-modal">
+    <div class="fin-modal-title" id="finModalTitle">—</div>
+    <div id="finModalBody"></div>
+    <div class="fin-modal-actions" id="finModalActions"></div>
+  </div>
+</div>
+
 <!-- ===== BOTTOM TAB BAR ===== -->
 <nav class="bottom-tabs" id="bottomTabs" aria-label="Sections">
   <button class="bot-tab active" data-tab="net">
@@ -563,6 +572,22 @@
   <button class="bot-tab" data-tab="wish">
     <span class="bot-tab-icon">🎯</span>
     <span class="bot-tab-label">Wishlist</span>
+  </button>
+  <button class="bot-tab" data-tab="overview">
+    <span class="bot-tab-icon">💰</span>
+    <span class="bot-tab-label">Overview</span>
+  </button>
+  <button class="bot-tab" data-tab="budgets">
+    <span class="bot-tab-icon">📈</span>
+    <span class="bot-tab-label">Budgets</span>
+  </button>
+  <button class="bot-tab" data-tab="goals">
+    <span class="bot-tab-icon">🏆</span>
+    <span class="bot-tab-label">Goals</span>
+  </button>
+  <button class="bot-tab" data-tab="calendar">
+    <span class="bot-tab-icon">📅</span>
+    <span class="bot-tab-label">Cal</span>
   </button>
   <button class="bot-tab" data-tab="txn">
     <span class="bot-tab-icon">💸</span>
