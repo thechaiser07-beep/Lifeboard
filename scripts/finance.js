@@ -1044,12 +1044,269 @@
       renderWishlist();
     } catch (e) { console.error('wishAdd failed', e); }
   }
-  // Add button uses inline onclick + delegation. Enter on the inputs:
-  const _wishName   = document.getElementById('wishName');
-  const _wishAmount = document.getElementById('wishAmount');
-  if (_wishName)   _wishName.addEventListener('keydown', (e) => { if (e.key === 'Enter') doWishAdd(); });
-  if (_wishAmount) _wishAmount.addEventListener('keydown', (e) => { if (e.key === 'Enter') doWishAdd(); });
+  // Old wish inputs removed from DOM — no wiring needed. Combined page below.
   renderWishlist();
+
+  // ============================================================
+  // WISHLIST COMBINED — unified wishes + goals
+  // ============================================================
+  function getReservedCHF(catKey, itemName) {
+    const items = storeGet('wishlist') || [];
+    return items
+      .filter(w => w.linkedCat === catKey && w.linkedAccount === itemName && !w.boughtAt)
+      .reduce((s, w) => s + (Number(w.amount) || 0), 0);
+  }
+
+  function populateWlFromSelect() {
+    const sel = document.getElementById('wlFromAcct');
+    if (!sel) return;
+    const accounts = (typeof listAllNwAccounts === 'function') ? listAllNwAccounts() : [];
+    const ICONS = { bank: '🏦', stocks: '📈', crypto: '🪙', other: '💼' };
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">No account linked</option>'
+      + accounts.map(a => {
+          const v = a.catKey + '::' + a.itemName;
+          return '<option value="' + v + '">' + ICONS[a.catKey] + ' ' + escapeHtml(a.itemName) + '</option>';
+        }).join('');
+    if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+  }
+
+  function renderWishlistCombined() {
+    populateWlFromSelect();
+    const wlList    = document.getElementById('wlList');
+    const wlEmpty   = document.getElementById('wlEmpty');
+    const wlTotalEl = document.getElementById('wlTotal');
+    const wlPctFoot = document.getElementById('wlPctFoot');
+    const wlCountEl = document.getElementById('wlCount');
+    const heroPctEl = document.getElementById('wlPctHero');
+    const heroFill  = document.getElementById('wlHeroFill');
+    if (!wlList) return;
+
+    const wishItems = (storeGet('wishlist') || []).filter(w => !w.boughtAt);
+    const goalItems = storeGet('goals') || [];
+    const grand = nwGrandCHF();
+    let totalCHF = 0;
+    wishItems.forEach(w => { totalCHF += Number(w.amount) || 0; });
+    goalItems.forEach(g => { totalCHF += Number(g.target) || 0; });
+
+    if (wlTotalEl) wlTotalEl.textContent = fmtMoney(totalCHF);
+    if (grand > 0) {
+      const pct = (totalCHF / grand) * 100;
+      const cls = pctClass(pct);
+      if (heroPctEl) {
+        heroPctEl.textContent = pct.toFixed(2) + '%';
+        heroPctEl.className = 'wish-hero-pct-num' + (cls === 'good' ? '' : (cls === 'warn' ? ' warn' : ' bad'));
+      }
+      if (heroFill) heroFill.style.width = Math.min(100, pct) + '%';
+      if (wlPctFoot) wlPctFoot.textContent = 'Your wishlist is ' + pct.toFixed(2) + '% of your ' + fmtMoney(grand) + ' net worth';
+    } else {
+      if (heroPctEl) { heroPctEl.textContent = '—'; heroPctEl.className = 'wish-hero-pct-num'; }
+      if (heroFill) heroFill.style.width = '0%';
+      if (wlPctFoot) wlPctFoot.textContent = 'Add accounts in Net Worth first to see this as a %';
+    }
+    const totalCount = wishItems.length + goalItems.length;
+    if (wlCountEl) wlCountEl.textContent = totalCount + (totalCount === 1 ? ' item' : ' items');
+
+    wlList.innerHTML = '';
+    if (!totalCount) { if (wlEmpty) wlEmpty.classList.remove('hidden'); return; }
+    if (wlEmpty) wlEmpty.classList.add('hidden');
+
+    const allWish = storeGet('wishlist') || [];
+
+    // --- Wishlist items ---
+    wishItems.slice().sort((a, b) => {
+      if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+      if (a.deadline) return -1; if (b.deadline) return 1;
+      return (b.amount || 0) - (a.amount || 0);
+    }).forEach(it => {
+      const realIdx = allWish.findIndex(w =>
+        (w.id && w.id === it.id) || (!w.id && w.ts === it.ts && w.name === it.name));
+      const cost = Number(it.amount) || 0;
+      const pct  = grand > 0 ? (cost / grand) * 100 : null;
+      const cls  = pct == null ? 'flat' : pctClass(pct);
+      const pctText = pct == null ? '—' : pct.toFixed(2) + '%';
+
+      let linkedHtml = '', buyHtml = '';
+      if (it.linkedCat && it.linkedAccount) {
+        const ICONS2 = { bank: '🏦', stocks: '📈', crypto: '🪙', other: '💼' };
+        const acctItems = storeGet('nw:' + it.linkedCat) || [];
+        const acct = acctItems.find(a => String(a.name) === String(it.linkedAccount));
+        const acctBal = acct ? Number(acct.amount) : 0;
+        const hasEnough = acctBal >= cost - 0.005;
+        linkedHtml = '<div class="wl-linked">'
+          + (ICONS2[it.linkedCat] || '💰') + ' ' + escapeHtml(it.linkedAccount)
+          + ' <span class="wl-reserved-pill">reserved</span></div>';
+        buyHtml = '<button class="wl-buy-btn' + (hasEnough ? '' : ' insufficient') + '" data-wl-idx="' + realIdx + '" type="button">'
+          + (hasEnough ? '✓ Buy — ' + fmtMoney(acctBal) + ' available'
+                       : '⚠ Need ' + fmtMoney(Math.abs(cost - acctBal)) + ' more')
+          + '</button>';
+      }
+
+      let deadlineHtml = '';
+      if (it.deadline) {
+        const dl = new Date(it.deadline + 'T00:00');
+        const daysLeft = Math.ceil((dl - new Date()) / 86400000);
+        deadlineHtml = '<div class="wl-deadline' + (daysLeft < 0 ? ' overdue' : daysLeft <= 7 ? ' soon' : '') + '">📅 '
+          + (daysLeft < 0 ? 'Overdue' : daysLeft === 0 ? 'Due today'
+             : daysLeft + 'd left · ' + dl.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+          + '</div>';
+      }
+
+      const card = document.createElement('div');
+      card.className = 'wl-card';
+      card.innerHTML = ''
+        + '<div class="wl-card-h">'
+        +   '<div class="wl-card-name">' + escapeHtml(it.name) + '</div>'
+        +   '<div class="wl-card-amt-wrap">'
+        +     '<div class="wl-card-amt">' + fmtMoney(cost) + '</div>'
+        +     '<div class="wl-card-pct ' + cls + '">' + pctText + ' of NW</div>'
+        +   '</div>'
+        +   '<button class="wl-del" data-wl-idx="' + realIdx + '" aria-label="Remove">×</button>'
+        + '</div>'
+        + ((linkedHtml || deadlineHtml) ? '<div class="wl-card-meta">' + linkedHtml + deadlineHtml + '</div>' : '')
+        + '<div class="wl-card-bar"><div class="wl-card-bar-fill ' + cls + '" style="width:' + Math.min(100, pct || 0) + '%"></div></div>'
+        + (buyHtml ? '<div class="wl-card-foot">' + buyHtml + '</div>' : '');
+      wlList.appendChild(card);
+    });
+
+    // --- Goals ---
+    if (goalItems.length) {
+      const div = document.createElement('div');
+      div.className = 'wl-section-divider';
+      div.textContent = 'SAVINGS GOALS';
+      wlList.appendChild(div);
+      goalItems.forEach((g, idx) => {
+        const saved  = Number(g.saved)  || 0;
+        const target = Number(g.target) || 0;
+        const pct    = target > 0 ? Math.min(100, Math.round(saved / target * 100)) : 0;
+        const done   = pct >= 100;
+        const color  = done ? '#6BE3A4' : pct >= 60 ? '#9D4EDD' : pct >= 30 ? '#4CC9F0' : '#F2C063';
+        let dlHtml = '';
+        if (g.deadline) {
+          const dl = new Date(g.deadline + 'T00:00');
+          const dLeft = Math.ceil((dl - new Date()) / 86400000);
+          dlHtml = '<div class="wl-deadline' + (dLeft < 0 ? ' overdue' : '') + '">📅 '
+            + (dLeft < 0 ? 'Overdue' : dLeft === 0 ? 'Due today' : dLeft + 'd left') + '</div>';
+        }
+        const card = document.createElement('div');
+        card.className = 'wl-card wl-goal-card';
+        card.innerHTML = ''
+          + '<div class="wl-card-h">'
+          +   '<div class="wl-card-name">' + escapeHtml(g.name) + '</div>'
+          +   '<div class="wl-card-amt-wrap">'
+          +     '<div class="wl-card-amt">' + fmtMoney(saved) + '<span class="wl-goal-of"> / ' + fmtMoney(target) + '</span></div>'
+          +     '<div class="wl-card-pct" style="color:' + color + '">' + pct + '%</div>'
+          +   '</div>'
+          +   '<button class="wl-del-goal" data-goal-idx="' + idx + '" aria-label="Remove">×</button>'
+          + '</div>'
+          + (dlHtml ? '<div class="wl-card-meta">' + dlHtml + '</div>' : '')
+          + '<div class="wl-card-bar"><div class="wl-card-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
+          + '<div class="wl-card-foot">'
+          +   (done ? '<span class="wl-done-badge">Goal reached!</span>' : '')
+          +   '<button class="wl-goal-contribute" data-goal-idx="' + idx + '" type="button">+ Add money</button>'
+          +   '<button class="wl-goal-edit" data-goal-idx="' + idx + '" type="button">✏ Edit</button>'
+          + '</div>';
+        wlList.appendChild(card);
+      });
+    }
+
+    // Wire wishlist delete
+    wlList.querySelectorAll('.wl-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.wlIdx);
+        const arr = storeGet('wishlist') || [];
+        if (i < 0 || !arr[i]) return;
+        if (!confirm('Remove "' + arr[i].name + '"?')) return;
+        arr.splice(i, 1); storeSet('wishlist', arr);
+        renderWishlistCombined();
+      });
+    });
+
+    // Wire buy
+    wlList.querySelectorAll('.wl-buy-btn:not(.insufficient)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.wlIdx);
+        const arr = storeGet('wishlist') || [];
+        const it = arr[i];
+        if (!it || !it.linkedCat || !it.linkedAccount) return;
+        if (!confirm('Buy "' + it.name + '" for ' + fmtMoney(it.amount) + '?\nDeducts from: ' + it.linkedAccount)) return;
+        const acctItems = storeGet('nw:' + it.linkedCat) || [];
+        const aIdx = acctItems.findIndex(a => String(a.name) === String(it.linkedAccount));
+        if (aIdx < 0) { alert('Linked account not found.'); return; }
+        const cost = Number(it.amount) || 0;
+        acctItems[aIdx].amount = (Number(acctItems[aIdx].amount) || 0) - cost;
+        storeSet('nw:' + it.linkedCat, acctItems);
+        logActivity(it.linkedCat, acctItems[aIdx].name + ' · bought ' + it.name, -cost, 'edit');
+        arr[i] = { ...it, boughtAt: Date.now() };
+        storeSet('wishlist', arr);
+        renderAllNetWorth();
+        renderWishlistCombined();
+      });
+    });
+
+    // Wire goal delete
+    wlList.querySelectorAll('.wl-del-goal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.goalIdx);
+        const arr = storeGet('goals') || [];
+        if (!confirm('Delete goal "' + (arr[i] || {}).name + '"?')) return;
+        arr.splice(i, 1); storeSet('goals', arr);
+        renderWishlistCombined();
+      });
+    });
+
+    // Wire goal contribute + edit (reuse existing modal functions)
+    wlList.querySelectorAll('.wl-goal-contribute').forEach(btn => {
+      btn.addEventListener('click', () => openContributeModal(parseInt(btn.dataset.goalIdx)));
+    });
+    wlList.querySelectorAll('.wl-goal-edit').forEach(btn => {
+      btn.addEventListener('click', () => openGoalEditModal(parseInt(btn.dataset.goalIdx)));
+    });
+  }
+
+  function doWlAdd() {
+    try {
+      const nEl = document.getElementById('wlName');
+      const aEl = document.getElementById('wlAmount');
+      const cEl = document.getElementById('wlCurrency');
+      const fEl = document.getElementById('wlFromAcct');
+      const dEl = document.getElementById('wlDeadline');
+      if (!nEl || !aEl) return;
+      const n = (nEl.value || '').trim();
+      const aRaw = parseFloat(aEl.value);
+      if (!n || isNaN(aRaw)) { nEl.focus(); return; }
+      const ccy = cEl ? cEl.value : 'AUD';
+      const rate = exchangeRates[ccy] || 1;
+      const amountCHF = aRaw / rate;
+      let linkedCat = null, linkedAccount = null;
+      if (fEl && fEl.value) {
+        const ix = fEl.value.indexOf('::');
+        if (ix > 0) { linkedCat = fEl.value.slice(0, ix); linkedAccount = fEl.value.slice(ix + 2); }
+      }
+      const arr = storeGet('wishlist') || [];
+      arr.push({
+        id: 'wl_' + Date.now() + '_' + Math.floor(Math.random() * 9999),
+        name: n, amount: amountCHF, entered_amount: aRaw, entered_currency: ccy,
+        linkedCat, linkedAccount,
+        deadline: (dEl && dEl.value) ? dEl.value : null,
+        ts: Date.now(), boughtAt: null
+      });
+      storeSet('wishlist', arr);
+      nEl.value = ''; aEl.value = '';
+      if (dEl) dEl.value = '';
+      if (fEl) fEl.value = '';
+      renderAllNetWorth();
+      renderWishlistCombined();
+    } catch (e) { console.error('wlAdd failed', e); }
+  }
+  window.__addWl = doWlAdd;
+  const _wlName   = document.getElementById('wlName');
+  const _wlAmount = document.getElementById('wlAmount');
+  if (_wlName)   _wlName.addEventListener('keydown',   e => { if (e.key === 'Enter') doWlAdd(); });
+  if (_wlAmount) _wlAmount.addEventListener('keydown', e => { if (e.key === 'Enter') doWlAdd(); });
+  const _wlAddBtn = document.getElementById('wlAddBtn');
+  if (_wlAddBtn) _wlAddBtn.addEventListener('click', doWlAdd);
+  renderWishlistCombined();
 
   // ============================================================
   // TRANSACTIONS — log outflows, optionally deduct from net worth
