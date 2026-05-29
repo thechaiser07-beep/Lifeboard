@@ -1149,7 +1149,8 @@
         return (b.ts || 0) - (a.ts || 0);
       }).forEach(tx => {
         const catMeta  = TXN_CATS[tx.category] || TXN_CATS.other;
-        const isDeducted = !!tx.deductedAt;
+        const isIncome = (tx.type === 'income');
+        const isDeducted = !!tx.deductedAt && !isIncome;
         const dateStr = tx.date
           ? new Date(tx.date + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
           : '';
