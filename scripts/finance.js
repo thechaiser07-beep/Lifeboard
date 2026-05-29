@@ -2246,9 +2246,8 @@
       }
     }
 
-    const bankSection = document.getElementById('ovwBankSection');
-    const bankList = document.getElementById('ovwBankList');
-    if (bankSection && bankList) {
+    // Bank accounts section removed — deduct via Net Worth section or Wishlist reserved accounts.
+    if (false) {
       const bankItems = storeGet('nw:bank') || [];
       if (bankItems.length) {
         bankSection.style.display = '';
