@@ -2617,7 +2617,7 @@
     const listEl  = document.getElementById('goalList');
     const emptyEl = document.getElementById('goalEmpty');
     const heroEl  = document.getElementById('goalHeroRow');
-    if (!listEl) return;
+    if (!listEl) { if (typeof renderWishlistCombined === 'function') renderWishlistCombined(); return; }
 
     if (!goals.length) {
       if (heroEl)  heroEl.style.display  = 'none';
