@@ -1292,6 +1292,7 @@
         + String(today.getMonth() + 1).padStart(2, '0') + '-'
         + String(today.getDate()).padStart(2, '0');
       const txns = storeGet('transactions') || [];
+      const txnType = (typeof _currentTxnType === 'string') ? _currentTxnType : 'expense';
       txns.push({
         id: 'tx_' + Date.now() + '_' + Math.floor(Math.random() * 9999),
         name: n,
@@ -1299,6 +1300,7 @@
         entered_amount: aRaw,
         entered_currency: ccy,
         category: catEl ? catEl.value : 'other',
+        type: txnType,
         date: (dEl && dEl.value) ? dEl.value : todayIso,
         ts: Date.now(),
         deductedAt: null,
