@@ -257,56 +257,55 @@
   </div>
 </div>
 
-<!-- ===== WISHLIST ===== -->
-<div class="section" data-section="wish">
+<!-- ===== WISHLIST (combined wishes + goals) ===== -->
+<div class="section" data-section="wishlist">
   <div class="section-title">
     <span class="section-title-text">WISHLIST</span>
   </div>
-  <!-- Hero card with stats -->
   <div class="card wish-hero">
     <div class="wish-hero-top">
       <div>
-        <div class="wish-hero-eyebrow">WISHLIST TOTAL</div>
-        <div class="wish-hero-num" id="wishTotal">CHF 0</div>
+        <div class="wish-hero-eyebrow">TOTAL RESERVED</div>
+        <div class="wish-hero-num" id="wlTotal">AUD 0</div>
       </div>
       <div class="wish-hero-pct-wrap">
         <div class="wish-hero-pct-label">% OF NET WORTH</div>
-        <div class="wish-hero-pct-num" id="wishPctOfNwHero">—</div>
+        <div class="wish-hero-pct-num" id="wlPctHero">—</div>
       </div>
     </div>
     <div class="wish-hero-bar">
-      <div class="wish-hero-bar-fill" id="wishHeroFill" style="width:0%"></div>
+      <div class="wish-hero-bar-fill" id="wlHeroFill" style="width:0%"></div>
     </div>
-    <div class="wish-hero-foot" id="wishPctOfNw">Add net worth first to see this as a %</div>
+    <div class="wish-hero-foot" id="wlPctFoot">Add net worth first to see this as a %</div>
   </div>
-
-  <!-- Add row -->
+  <div class="wish-section-h">
+    <span class="wish-section-label">YOUR LIST</span>
+    <span class="wish-section-count" id="wlCount">0 items</span>
+  </div>
+  <div id="wlList"></div>
+  <div class="wish-empty-card hidden" id="wlEmpty">
+    <div class="wish-empty-icon">🎯</div>
+    <div class="wish-empty-title">Nothing on the list yet</div>
+    <div class="wish-empty-sub">Add something you're saving for — link it to an account and the money stays there, reserved, until you buy.</div>
+  </div>
   <div class="card wish-add-card">
     <div class="wish-add-eyebrow">+ ADD AN ITEM</div>
-    <div class="wish-add-row">
-      <input type="text"   id="wishName"   placeholder="Item name (e.g. New iPhone Pro Max)" class="wish-input wish-input-name">
-      <input type="number" id="wishAmount" placeholder="Cost" step="0.01" class="wish-input wish-input-amt">
-      <select id="wishCurrency" class="wish-input wish-input-ccy fin-select">
+    <div class="wl-add-row">
+      <input type="text" id="wlName" placeholder="Item name (e.g. New iPhone)" class="wish-input wish-input-name">
+      <input type="number" id="wlAmount" placeholder="Cost" step="0.01" class="wish-input wish-input-amt">
+      <select id="wlCurrency" class="wish-input wish-input-ccy fin-select">
         <option value="CHF">CHF</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
-        <option value="AUD">AUD</option>
+        <option value="AUD" selected>AUD</option>
       </select>
-      <button class="wish-add-btn" id="wishAddBtn" onclick="window.__addWish && window.__addWish()">+ Add</button>
+      <select id="wlFromAcct" class="wish-input fin-select" title="Reserve from this account (optional)">
+        <option value="">No account linked</option>
+      </select>
+      <label class="date-field" title="Target date (optional)"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="wlDeadline" /></label>
+      <button class="wish-add-btn" id="wlAddBtn">+ Add</button>
     </div>
-  </div>
-
-  <!-- Items list -->
-  <div class="wish-section-h">
-    <span class="wish-section-label">YOUR WISHES</span>
-    <span class="wish-section-count" id="wishCount">0 items</span>
-  </div>
-  <div id="wishList"></div>
-  <div class="wish-empty-card" id="wishEmpty">
-    <div class="wish-empty-icon">🎯</div>
-    <div class="wish-empty-title">No wishes yet</div>
-    <div class="wish-empty-sub">Add anything you're saving for — the dashboard will calculate what % of your net worth it'd cost.</div>
   </div>
 </div>
 
