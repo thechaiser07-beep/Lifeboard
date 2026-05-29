@@ -1327,6 +1327,18 @@
   renderTransactions();
 
   // ============================================================
+  // TRANSACTION TYPE TOGGLE
+  // ============================================================
+  let _currentTxnType = 'expense';
+  window.setTxnType = function(type) {
+    _currentTxnType = type;
+    const expBtn = document.getElementById('txnTypeExp');
+    const incBtn = document.getElementById('txnTypeInc');
+    if (expBtn) expBtn.className = 'txn-type-btn' + (type === 'expense' ? ' active-exp' : '');
+    if (incBtn) incBtn.className = 'txn-type-btn' + (type === 'income'  ? ' active-inc' : '');
+  };
+
+  // ============================================================
   // ADD-BUTTON BULLETPROOFING — three independent paths:
   //   1. inline onclick attribute (in the HTML) calls window.__addX
   //   2. document-level click delegation matches by id
