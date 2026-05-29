@@ -1183,6 +1183,19 @@
           + '</div>';
       }
 
+      // Build account options for the inline edit form
+      const wlAccounts = (typeof listAllNwAccounts === 'function') ? listAllNwAccounts() : [];
+      const WLICONS = { bank: '🏦', stocks: '📈', crypto: '🪙', other: '💼' };
+      const acctOpts = '<option value="">No account linked</option>'
+        + wlAccounts.map(a => {
+            const v = a.catKey + '::' + a.itemName;
+            const sel = (it.linkedCat === a.catKey && it.linkedAccount === a.itemName) ? ' selected' : '';
+            return '<option value="' + v + '"' + sel + '>' + WLICONS[a.catKey] + ' ' + escapeHtml(a.itemName) + '</option>';
+          }).join('');
+      const wlSym = currencyEl ? currencyEl.value : 'AUD';
+      const wlRate = exchangeRates[wlSym] || 1;
+      const displayAmt = (cost * wlRate).toFixed(2);
+
       const card = document.createElement('div');
       card.className = 'wl-card';
       card.innerHTML = ''
@@ -1192,11 +1205,22 @@
         +     '<div class="wl-card-amt">' + fmtMoney(cost) + '</div>'
         +     '<div class="wl-card-pct ' + cls + '">' + pctText + ' of NW</div>'
         +   '</div>'
-        +   '<button class="wl-del" data-wl-idx="' + realIdx + '" aria-label="Remove">×</button>'
+        +   '<div class="wl-card-btns">'
+        +     '<button class="wl-edit" data-wl-idx="' + realIdx + '" title="Edit" type="button">✏</button>'
+        +     '<button class="wl-del"  data-wl-idx="' + realIdx + '" title="Remove" type="button">×</button>'
+        +   '</div>'
         + '</div>'
         + ((linkedHtml || deadlineHtml) ? '<div class="wl-card-meta">' + linkedHtml + deadlineHtml + '</div>' : '')
         + '<div class="wl-card-bar"><div class="wl-card-bar-fill ' + cls + '" style="width:' + Math.min(100, pct || 0) + '%"></div></div>'
-        + (buyHtml ? '<div class="wl-card-foot">' + buyHtml + '</div>' : '');
+        + (buyHtml ? '<div class="wl-card-foot">' + buyHtml + '</div>' : '')
+        + '<div class="wl-edit-form" style="display:none">'
+        +   '<input type="text"   class="wl-ef-name" value="' + escapeHtml(it.name) + '" placeholder="Item name" />'
+        +   '<input type="number" class="wl-ef-amt"  value="' + displayAmt + '" step="0.01" placeholder="Amount" />'
+        +   '<select class="wl-ef-acct fin-select">' + acctOpts + '</select>'
+        +   '<label class="date-field" title="Target date"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" class="wl-ef-deadline" value="' + (it.deadline || '') + '" /></label>'
+        +   '<button class="wl-ef-save"   data-wl-idx="' + realIdx + '" type="button">Save</button>'
+        +   '<button class="wl-ef-cancel" data-wl-idx="' + realIdx + '" type="button">Cancel</button>'
+        + '</div>';
       wlList.appendChild(card);
     });
 
