@@ -151,8 +151,8 @@
   }
   loadExchangeRates();
 
-  function fmtMoney(amountCHF) {
-    const symbol = currencyEl ? currencyEl.value : 'CHF';
+  function fmtMoney(amount) {
+    const symbol = currencyEl ? currencyEl.value : 'AUD';
     const rate = exchangeRates[symbol] || 1;
     const num = (Number(amountCHF) || 0) * rate;
     return symbol + ' ' + num.toLocaleString('en-US', { minimumFractionDigits: num % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
