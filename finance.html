@@ -310,6 +310,167 @@
   </div>
 </div>
 
+<!-- ===== OVERVIEW ===== -->
+<div class="section" data-section="overview">
+  <div class="section-title">
+    <span class="section-title-text">OVERVIEW</span>
+  </div>
+
+  <div class="ovw-month-nav">
+    <button class="ovw-nav-btn" id="ovwPrevBtn">‹</button>
+    <div class="ovw-month-label" id="ovwMonthLabel">—</div>
+    <button class="ovw-nav-btn" id="ovwNextBtn">›</button>
+  </div>
+
+  <div class="card ovw-balance-card">
+    <div class="ovw-balance-eyebrow">BALANCE</div>
+    <div class="ovw-balance-num zero" id="ovwBalance">—</div>
+    <div class="ovw-balance-sub" id="ovwSavingsText"></div>
+  </div>
+
+  <div class="ovw-metrics-grid">
+    <div class="ovw-metric">
+      <div class="ovw-metric-label">Income</div>
+      <div class="ovw-metric-val inc" id="ovwIncome">—</div>
+      <div class="ovw-metric-change" id="ovwIncomeChange"></div>
+    </div>
+    <div class="ovw-metric">
+      <div class="ovw-metric-label">Expenses</div>
+      <div class="ovw-metric-val exp" id="ovwExpenses">—</div>
+      <div class="ovw-metric-change" id="ovwExpChange"></div>
+    </div>
+    <div class="ovw-metric">
+      <div class="ovw-metric-label">Savings rate</div>
+      <div class="ovw-metric-val" id="ovwSavingsRate">—</div>
+    </div>
+  </div>
+
+  <div class="ovw-cat-section" id="ovwCatSection" style="display:none">
+    <div class="ovw-cat-head">SPENDING BY CATEGORY</div>
+    <div id="ovwCatList"></div>
+  </div>
+</div>
+
+<!-- ===== BUDGETS ===== -->
+<div class="section" data-section="budgets">
+  <div class="section-title">
+    <span class="section-title-text">BUDGETS</span>
+  </div>
+
+  <div class="bgt-hero" id="bgtHero" style="display:none">
+    <div class="bgt-hero-row">
+      <div class="bgt-hero-stat">
+        <div class="bgt-hero-label">Monthly budget</div>
+        <div class="bgt-hero-val" id="bgtTotalLimit">—</div>
+      </div>
+      <div class="bgt-hero-stat">
+        <div class="bgt-hero-label">Spent</div>
+        <div class="bgt-hero-val over" id="bgtTotalSpent">—</div>
+      </div>
+      <div class="bgt-hero-stat">
+        <div class="bgt-hero-label">Remaining</div>
+        <div class="bgt-hero-val" id="bgtTotalRemaining">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bgtList"></div>
+
+  <div class="bgt-empty-card" id="bgtEmpty">
+    <div class="bgt-empty-icon">📊</div>
+    <div class="bgt-empty-title">No budgets yet</div>
+    <div class="bgt-empty-sub">Set monthly limits per category to track where your money goes.</div>
+  </div>
+
+  <div class="card bgt-add-card">
+    <div class="bgt-add-eyebrow">+ ADD BUDGET</div>
+    <div class="bgt-add-grid">
+      <input type="text" id="bgtName" placeholder="Category (e.g. Food)" class="bgt-input">
+      <input type="number" id="bgtLimit" placeholder="Monthly limit (CHF)" step="0.01" class="bgt-input">
+      <button class="bgt-add-btn" id="bgtAddBtn" onclick="window.__addBudget && window.__addBudget()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GOALS ===== -->
+<div class="section" data-section="goals">
+  <div class="section-title">
+    <span class="section-title-text">GOALS</span>
+  </div>
+
+  <div class="goal-hero-row" id="goalHeroRow" style="display:none">
+    <div class="bgt-hero-stat">
+      <div class="bgt-hero-label">Saved</div>
+      <div class="bgt-hero-val ok" id="goalTotalSaved">—</div>
+    </div>
+    <div class="bgt-hero-stat">
+      <div class="bgt-hero-label">Target</div>
+      <div class="bgt-hero-val" id="goalTotalTarget">—</div>
+    </div>
+    <div class="bgt-hero-stat">
+      <div class="bgt-hero-label">Goals</div>
+      <div class="bgt-hero-val" id="goalCount">0</div>
+    </div>
+  </div>
+
+  <div id="goalList"></div>
+
+  <div class="goal-empty-card" id="goalEmpty">
+    <div class="goal-empty-icon">🏆</div>
+    <div class="goal-empty-title">No goals yet</div>
+    <div class="goal-empty-sub">Set savings targets — trips, emergency funds, or anything worth working toward.</div>
+  </div>
+
+  <div class="card goal-add-card">
+    <div class="goal-add-eyebrow">+ ADD GOAL</div>
+    <div class="goal-add-grid">
+      <input type="text" id="goalName" placeholder="Goal name (e.g. Japan trip)" class="goal-input">
+      <input type="number" id="goalTarget" placeholder="Target (CHF)" step="0.01" class="goal-input">
+      <label class="date-field" title="Deadline (optional)"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="goalDeadline" /></label>
+      <button class="goal-add-btn" id="goalAddBtn" onclick="window.__addGoal && window.__addGoal()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CALENDAR ===== -->
+<div class="section" data-section="calendar">
+  <div class="section-title">
+    <span class="section-title-text">CALENDAR</span>
+  </div>
+
+  <div class="fin-cal-nav">
+    <button class="fin-cal-btn" id="calPrevBtn">‹</button>
+    <div class="fin-cal-month-label" id="calMonthLabel">—</div>
+    <button class="fin-cal-btn" id="calNextBtn">›</button>
+  </div>
+
+  <div class="fin-cal-stats">
+    <div class="fin-cal-stat">
+      <div class="fin-cal-stat-label">Income this month</div>
+      <div class="fin-cal-stat-val inc" id="calIncome">—</div>
+    </div>
+    <div class="fin-cal-stat">
+      <div class="fin-cal-stat-label">Expenses this month</div>
+      <div class="fin-cal-stat-val exp" id="calExpenses">—</div>
+    </div>
+  </div>
+
+  <div class="fin-cal-grid-wrap">
+    <div class="fin-cal-dow-row">
+      <div class="fin-cal-dow">Su</div><div class="fin-cal-dow">Mo</div>
+      <div class="fin-cal-dow">Tu</div><div class="fin-cal-dow">We</div>
+      <div class="fin-cal-dow">Th</div><div class="fin-cal-dow">Fr</div>
+      <div class="fin-cal-dow">Sa</div>
+    </div>
+    <div class="fin-cal-grid" id="finCalGrid"></div>
+  </div>
+
+  <div class="fin-cal-detail" id="finCalDetail" style="display:none">
+    <div class="fin-cal-detail-head" id="finCalDetailHead">—</div>
+    <div id="finCalDetailList"></div>
+  </div>
+</div>
+
 <!-- ===== TRANSACTIONS ===== -->
 <div class="section" data-section="txn">
   <div class="section-title">
