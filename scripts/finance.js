@@ -958,7 +958,7 @@
     const wishCountEl = document.getElementById('wishCount');
     const heroPctEl   = document.getElementById('wishPctOfNwHero');
     const heroFill    = document.getElementById('wishHeroFill');
-    if (!wishList) return;
+    if (!wishList) { if (typeof renderWishlistCombined === 'function') renderWishlistCombined(); return; }
     const items = storeGet('wishlist') || [];
     const grand = nwGrandCHF();
     let total = 0;
