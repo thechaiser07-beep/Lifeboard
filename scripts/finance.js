@@ -1542,14 +1542,13 @@
     try {
       const nEl   = document.getElementById('txnName');
       const aEl   = document.getElementById('txnAmt');
-      const cEl   = document.getElementById('txnCcy');
       const catEl = document.getElementById('txnCat');
       const dEl   = document.getElementById('txnDate');
       if (!nEl || !aEl) return;
       const n    = (nEl.value || '').trim();
       const aRaw = parseFloat(aEl.value);
       if (!n || isNaN(aRaw) || aRaw <= 0) { nEl.focus(); return; }
-      const ccy  = cEl ? cEl.value : 'CHF';
+      const ccy  = currencyEl ? currencyEl.value : 'AUD';
       const rate = exchangeRates[ccy] || 1;
       const today = new Date();
       const todayIso = today.getFullYear() + '-'
