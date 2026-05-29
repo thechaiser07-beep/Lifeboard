@@ -560,7 +560,7 @@
 
   if (currencyEl) {
     const savedCur = storeGet(CURRENCY_KEY);
-    if (savedCur) currencyEl.value = savedCur;
+    currencyEl.value = savedCur || 'AUD';
     currencyEl.addEventListener('change', () => {
       storeSet(CURRENCY_KEY, currencyEl.value);
       renderAllNetWorth();
