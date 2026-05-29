@@ -1989,15 +1989,167 @@
       if (bankItems.length) {
         bankSection.style.display = '';
         const bankTotal = bankItems.reduce((s, it) => s + (Number(it.amount) || 0), 0);
-        bankList.innerHTML = bankItems.map(it => {
+
+        let bHtml = '<div class="ovw-bank-total">' + fmtMoney(bankTotal) + '</div>';
+        bankItems.forEach((it, idx) => {
           const v = Number(it.amount) || 0;
           const pct = bankTotal > 0 ? Math.round(v / bankTotal * 100) : 0;
-          return '<div class="ovw-cat-row">'
+          bHtml += '<div class="ovw-bank-row">'
             + '<div class="ovw-cat-name">🏦 ' + escapeHtml(it.name) + '</div>'
             + '<div class="ovw-cat-bar-wrap"><div class="ovw-cat-bar-fill" style="width:' + pct + '%;background:#7DD3FC"></div></div>'
-            + '<div class="ovw-cat-amt">' + fmtMoney(v) + '</div>'
+            + '<div class="ovw-bank-row-right">'
+            +   '<span class="ovw-cat-amt">' + fmtMoney(v) + '</span>'
+            +   '<button class="ovw-bank-minus" data-idx="' + idx + '" type="button">−</button>'
+            + '</div>'
+            + '</div>'
+            + '<div class="ovw-bank-inline-wrap" id="ovwBankInline_' + idx + '" style="display:none">'
+            +   '<input type="number" class="ovw-bank-inline-amt" placeholder="Amount" step="0.01" />'
+            +   '<input type="text" class="ovw-bank-inline-label" placeholder="Description (optional)" />'
+            +   '<button class="ovw-bank-inline-ok" data-idx="' + idx + '" type="button">Deduct</button>'
+            +   '<button class="ovw-bank-inline-cancel" data-idx="' + idx + '" type="button">Cancel</button>'
             + '</div>';
-        }).join('');
+        });
+
+        bHtml += '<button class="ovw-bank-split-btn" id="ovwBankSplitBtn" type="button">+ Split expense across accounts</button>'
+          + '<div class="ovw-bank-split-wrap" id="ovwBankSplitWrap" style="display:none">'
+          +   '<div class="ovw-bank-split-head">Split expense across accounts</div>'
+          +   '<input type="text" id="ovwSplitLabel" class="ovw-bank-split-label-input" placeholder="Description (optional)" />'
+          +   bankItems.map((it, idx) => {
+                const v = Number(it.amount) || 0;
+                return '<div class="ovw-bank-split-row">'
+                  + '<label class="ovw-split-chk-label">'
+                  +   '<input type="checkbox" class="ovw-split-chk" data-idx="' + idx + '" />'
+                  +   '<span class="ovw-split-chk-name">🏦 ' + escapeHtml(it.name) + '</span>'
+                  +   '<span class="ovw-split-avail">' + fmtMoney(v) + '</span>'
+                  + '</label>'
+                  + '<input type="number" class="ovw-split-amt" data-idx="' + idx + '" placeholder="Amount" step="0.01" style="display:none" />'
+                  + '</div>';
+              }).join('')
+          +   '<div class="ovw-bank-split-footer">'
+          +     '<button class="ovw-bank-split-apply" id="ovwSplitApply" type="button">Apply deductions</button>'
+          +     '<button class="ovw-bank-split-close" id="ovwSplitClose" type="button">Cancel</button>'
+          +   '</div>'
+          + '</div>';
+
+        bankList.innerHTML = bHtml;
+
+        // Toggle single-account inline deduct form
+        bankList.querySelectorAll('.ovw-bank-minus').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const i = parseInt(btn.dataset.idx);
+            const wrap = document.getElementById('ovwBankInline_' + i);
+            if (!wrap) return;
+            const isOpen = wrap.style.display !== 'none';
+            bankItems.forEach((_, j) => {
+              const w = document.getElementById('ovwBankInline_' + j);
+              if (w) w.style.display = 'none';
+            });
+            if (!isOpen) {
+              wrap.style.display = 'flex';
+              const inp = wrap.querySelector('.ovw-bank-inline-amt');
+              if (inp) { inp.value = ''; inp.focus(); }
+            }
+          });
+        });
+
+        bankList.querySelectorAll('.ovw-bank-inline-cancel').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const wrap = document.getElementById('ovwBankInline_' + btn.dataset.idx);
+            if (wrap) wrap.style.display = 'none';
+          });
+        });
+
+        bankList.querySelectorAll('.ovw-bank-inline-ok').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const i = parseInt(btn.dataset.idx);
+            const wrap = document.getElementById('ovwBankInline_' + i);
+            if (!wrap) return;
+            const amtInp = wrap.querySelector('.ovw-bank-inline-amt');
+            const lblInp = wrap.querySelector('.ovw-bank-inline-label');
+            const symbol = currencyEl ? currencyEl.value : 'AUD';
+            const rate = exchangeRates[symbol] || 1;
+            const amt = parseFloat(amtInp ? amtInp.value : '');
+            if (isNaN(amt) || amt <= 0) { if (amtInp) amtInp.focus(); return; }
+            const amtCHF = amt / rate;
+            const items = storeGet('nw:bank') || [];
+            if (!items[i]) return;
+            const lbl = lblInp && lblInp.value.trim() ? ' · ' + lblInp.value.trim() : '';
+            items[i].amount = (Number(items[i].amount) || 0) - amtCHF;
+            storeSet('nw:bank', items);
+            logActivity('bank', items[i].name + lbl, -amtCHF, 'edit');
+            renderAllNetWorth();
+            renderOverview();
+          });
+        });
+
+        // Enter / Escape on inline inputs
+        bankList.querySelectorAll('.ovw-bank-inline-wrap').forEach(wrap => {
+          wrap.querySelectorAll('input').forEach(inp => {
+            inp.addEventListener('keydown', e => {
+              if (e.key === 'Enter')  wrap.querySelector('.ovw-bank-inline-ok').click();
+              else if (e.key === 'Escape') wrap.querySelector('.ovw-bank-inline-cancel').click();
+            });
+          });
+        });
+
+        // Split form toggle
+        const splitBtn = document.getElementById('ovwBankSplitBtn');
+        const splitWrap = document.getElementById('ovwBankSplitWrap');
+        if (splitBtn && splitWrap) {
+          splitBtn.addEventListener('click', () => {
+            const isOpen = splitWrap.style.display !== 'none';
+            splitWrap.style.display = isOpen ? 'none' : '';
+            splitBtn.textContent = isOpen ? '+ Split expense across accounts' : '− Close split form';
+          });
+        }
+
+        // Reveal per-account amount input when checkbox is checked
+        bankList.querySelectorAll('.ovw-split-chk').forEach(chk => {
+          chk.addEventListener('change', () => {
+            const inp = bankList.querySelector('.ovw-split-amt[data-idx="' + chk.dataset.idx + '"]');
+            if (!inp) return;
+            inp.style.display = chk.checked ? '' : 'none';
+            if (chk.checked) { inp.value = ''; inp.focus(); }
+          });
+        });
+
+        // Apply split deductions
+        const applyBtn = document.getElementById('ovwSplitApply');
+        if (applyBtn) {
+          applyBtn.addEventListener('click', () => {
+            const lbl = ((document.getElementById('ovwSplitLabel') || {}).value || '').trim();
+            const checked = bankList.querySelectorAll('.ovw-split-chk:checked');
+            if (!checked.length) { alert('Select at least one account.'); return; }
+            const symbol = currencyEl ? currencyEl.value : 'AUD';
+            const rate = exchangeRates[symbol] || 1;
+            const items = storeGet('nw:bank') || [];
+            let anyDone = false;
+            checked.forEach(chk => {
+              const i = parseInt(chk.dataset.idx);
+              const inp = bankList.querySelector('.ovw-split-amt[data-idx="' + i + '"]');
+              const amt = parseFloat(inp ? inp.value : '');
+              if (isNaN(amt) || amt <= 0 || !items[i]) return;
+              const amtCHF = amt / rate;
+              items[i].amount = (Number(items[i].amount) || 0) - amtCHF;
+              logActivity('bank', items[i].name + (lbl ? ' · ' + lbl : ''), -amtCHF, 'edit');
+              anyDone = true;
+            });
+            if (!anyDone) { alert('Enter an amount for at least one selected account.'); return; }
+            storeSet('nw:bank', items);
+            renderAllNetWorth();
+            renderOverview();
+          });
+        }
+
+        // Close split form
+        const closeBtn = document.getElementById('ovwSplitClose');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            if (splitWrap) splitWrap.style.display = 'none';
+            if (splitBtn) splitBtn.textContent = '+ Split expense across accounts';
+          });
+        }
+
       } else {
         bankSection.style.display = 'none';
       }
