@@ -1310,6 +1310,67 @@
       });
     });
 
+    // Wire wishlist edit toggle
+    wlList.querySelectorAll('.wl-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.wl-card');
+        const form = card ? card.querySelector('.wl-edit-form') : null;
+        if (!form) return;
+        const isOpen = form.style.display !== 'none';
+        wlList.querySelectorAll('.wl-edit-form').forEach(f => { f.style.display = 'none'; });
+        if (!isOpen) {
+          form.style.display = 'flex';
+          const ni = form.querySelector('.wl-ef-name');
+          if (ni) { ni.focus(); ni.select(); }
+        }
+      });
+    });
+
+    wlList.querySelectorAll('.wl-ef-cancel').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = btn.closest('.wl-edit-form');
+        if (f) f.style.display = 'none';
+      });
+    });
+
+    wlList.querySelectorAll('.wl-ef-save').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.wlIdx);
+        const form = btn.closest('.wl-edit-form');
+        if (!form) return;
+        const nEl  = form.querySelector('.wl-ef-name');
+        const aEl  = form.querySelector('.wl-ef-amt');
+        const acEl = form.querySelector('.wl-ef-acct');
+        const dEl  = form.querySelector('.wl-ef-deadline');
+        const newName = (nEl ? nEl.value : '').trim();
+        const aRaw = parseFloat(aEl ? aEl.value : '');
+        if (!newName || isNaN(aRaw) || aRaw <= 0) { if (nEl) nEl.focus(); return; }
+        const sym = currencyEl ? currencyEl.value : 'AUD';
+        const amtBase = aRaw / (exchangeRates[sym] || 1);
+        let linkedCat = null, linkedAccount = null;
+        if (acEl && acEl.value) {
+          const ix = acEl.value.indexOf('::');
+          if (ix > 0) { linkedCat = acEl.value.slice(0, ix); linkedAccount = acEl.value.slice(ix + 2); }
+        }
+        const arr = storeGet('wishlist') || [];
+        if (!arr[i]) return;
+        arr[i] = { ...arr[i], name: newName, amount: amtBase, entered_amount: aRaw, entered_currency: sym,
+          linkedCat, linkedAccount, deadline: (dEl && dEl.value) ? dEl.value : null };
+        storeSet('wishlist', arr);
+        renderAllNetWorth();
+        renderWishlistCombined();
+      });
+    });
+
+    wlList.querySelectorAll('.wl-edit-form').forEach(form => {
+      form.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  form.querySelector('.wl-ef-save').click();
+          else if (e.key === 'Escape') form.querySelector('.wl-ef-cancel').click();
+        });
+      });
+    });
+
     // Wire goal contribute + edit (reuse existing modal functions)
     wlList.querySelectorAll('.wl-goal-contribute').forEach(btn => {
       btn.addEventListener('click', () => openContributeModal(parseInt(btn.dataset.goalIdx)));
