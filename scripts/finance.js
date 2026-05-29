@@ -714,7 +714,7 @@
       const cost = document.createElement('div');
       cost.style.cssText = 'text-align:right;line-height:1.1';
       const bigNum = fmtMoney(m);
-      const origHint = (it.entered_currency && it.entered_currency !== 'CHF' && it.entered_amount != null)
+      const origHint = (it.entered_currency && it.entered_currency !== 'AUD' && it.entered_amount != null)
         ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">billed ' + it.entered_currency + ' ' + Number(it.entered_amount).toLocaleString('en-AU', { minimumFractionDigits: it.entered_amount % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }) + ' / ' + it.period + '</div>'
         : (it.period !== 'monthly'
             ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">billed ' + fmtMoney(it.amount) + ' / ' + it.period + '</div>'
