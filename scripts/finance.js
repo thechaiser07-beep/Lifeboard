@@ -2116,14 +2116,13 @@
         if (changed) {
           renderAllNetWorth();
           renderSubs();
-          renderWishlist();
           renderOrders();
           renderTransactions();
           safeRenderTicker();
-          if (typeof renderOverview    === 'function') renderOverview();
-          if (typeof renderBudgets     === 'function') renderBudgets();
-          if (typeof renderGoals       === 'function') renderGoals();
-          if (typeof renderFinCalendar === 'function') renderFinCalendar();
+          if (typeof renderWishlistCombined === 'function') renderWishlistCombined();
+          if (typeof renderOverview         === 'function') renderOverview();
+          if (typeof renderBudgets          === 'function') renderBudgets();
+          if (typeof renderFinCalendar      === 'function') renderFinCalendar();
         }
       }
       _syncBadge('ok');
@@ -2141,14 +2140,13 @@
           });
           renderAllNetWorth();
           renderSubs();
-          renderWishlist();
           renderOrders();
           renderTransactions();
           safeRenderTicker();
-          if (typeof renderOverview    === 'function') renderOverview();
-          if (typeof renderBudgets     === 'function') renderBudgets();
-          if (typeof renderGoals       === 'function') renderGoals();
-          if (typeof renderFinCalendar === 'function') renderFinCalendar();
+          if (typeof renderWishlistCombined === 'function') renderWishlistCombined();
+          if (typeof renderOverview         === 'function') renderOverview();
+          if (typeof renderBudgets          === 'function') renderBudgets();
+          if (typeof renderFinCalendar      === 'function') renderFinCalendar();
         })
         .subscribe();
     } catch (e) { _syncBadge('err'); console.error('finance sync init failed', e); }
