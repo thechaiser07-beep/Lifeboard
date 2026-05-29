@@ -80,7 +80,7 @@
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   tabs.forEach(b => b.addEventListener('click', () => setActiveTab(b.dataset.tab)));
-  const VALID_TABS = ['net','subs','incoming','wish','overview','budgets','goals','calendar','txn'];
+  const VALID_TABS = ['net','subs','incoming','wishlist','overview','budgets','calendar','txn'];
   const savedTab = storeGet(TAB_KEY);
   setActiveTab(savedTab && VALID_TABS.includes(savedTab) ? savedTab : 'net');
 
