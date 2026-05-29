@@ -2699,7 +2699,7 @@
     openFinModal(
       'Add to: ' + g.name,
       '<div class="fin-modal-field">'
-        + '<label class="fin-modal-label">Amount (CHF)</label>'
+        + '<label class="fin-modal-label">Amount (AUD)</label>'
         + '<input class="fin-modal-input" id="contributeAmt" type="number" step="0.01" placeholder="0.00">'
         + '</div>',
       [
