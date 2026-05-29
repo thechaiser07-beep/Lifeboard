@@ -506,6 +506,10 @@
   <!-- Add form -->
   <div class="card txn-add-card">
     <div class="txn-add-eyebrow">+ LOG A TRANSACTION</div>
+    <div class="txn-type-toggle">
+      <button class="txn-type-btn active-exp" id="txnTypeExp" onclick="setTxnType('expense')">Expense</button>
+      <button class="txn-type-btn" id="txnTypeInc" onclick="setTxnType('income')">Income</button>
+    </div>
     <div class="txn-add-grid">
       <input type="text"   id="txnName" placeholder="Description (e.g. Groceries)" class="txn-input txn-input-name">
       <input type="number" id="txnAmt"  placeholder="Amount" step="0.01" class="txn-input txn-input-amt">
