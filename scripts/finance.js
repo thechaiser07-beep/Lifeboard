@@ -1155,7 +1155,9 @@
           ? new Date(tx.date + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
           : '';
 
-        const footHtml = isDeducted
+        const footHtml = isIncome
+          ? ''
+          : isDeducted
           ? '<div class="txn-card-foot">'
             + '<span class="txn-deducted-pill">Deducted from ' + escapeHtml(tx.deductedFrom && tx.deductedFrom.name ? tx.deductedFrom.name : 'account') + '</span>'
             + '<button class="txn-deduct-undo" data-undo-id="' + tx.id + '">Undo</button>'
@@ -1165,8 +1167,8 @@
             + '</div>';
 
         const row = document.createElement('div');
-        row.className = 'txn-card';
-        row.style.borderLeftColor = catMeta.color;
+        row.className = 'txn-card' + (isIncome ? ' is-income' : '');
+        row.style.borderLeftColor = isIncome ? '#6BE3A4' : catMeta.color;
         row.innerHTML =
             '<div class="txn-card-h">'
           +   '<div class="txn-card-name">' + escapeHtml(tx.name) + '</div>'
