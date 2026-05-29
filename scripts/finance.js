@@ -7,7 +7,7 @@
   // every device stays in sync without a per-table schema.
   // ============================================================
   const APP_KEY = 'finance';
-  const SYNC_KEYS = ['nw:bank','nw:stocks','nw:crypto','nw:other','nw_activity','nw_history','subs','incoming_orders','wishlist','nw_currency','transactions'];
+  const SYNC_KEYS = ['nw:bank','nw:stocks','nw:crypto','nw:other','nw_activity','nw_history','subs','incoming_orders','wishlist','nw_currency','transactions','budgets','goals'];
 
   let _supa = null;
   let _syncTimer = null;
