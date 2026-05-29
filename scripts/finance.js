@@ -1854,6 +1854,10 @@
           renderOrders();
           renderTransactions();
           safeRenderTicker();
+          if (typeof renderOverview    === 'function') renderOverview();
+          if (typeof renderBudgets     === 'function') renderBudgets();
+          if (typeof renderGoals       === 'function') renderGoals();
+          if (typeof renderFinCalendar === 'function') renderFinCalendar();
         }
       }
       _syncBadge('ok');
