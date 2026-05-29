@@ -582,10 +582,9 @@
       const n = nameInput.value.trim();
       const a = parseFloat(amtInput.value);
       if (!n || isNaN(a)) return;
-      // Interpret the input in the CURRENTLY SELECTED display currency, then
-      // convert to CHF for storage. So if USD is selected and user types 40000,
-      // we store 40000 / USD-per-CHF rate — 31,400 CHF; displays as $40,000.
-      const symbol = currencyEl ? currencyEl.value : 'CHF';
+      // Interpret the input in the display currency and convert to AUD for storage.
+      // e.g. if USD is selected and user types 40000, store 40000 / USD-per-AUD rate.
+      const symbol = currencyEl ? currencyEl.value : 'AUD';
       const rate = exchangeRates[symbol] || 1;
       const amountCHF = a / rate;
       const items = storeGet('nw:' + cat.key) || [];
