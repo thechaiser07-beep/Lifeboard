@@ -1879,9 +1879,609 @@
           renderOrders();
           renderTransactions();
           safeRenderTicker();
+          if (typeof renderOverview    === 'function') renderOverview();
+          if (typeof renderBudgets     === 'function') renderBudgets();
+          if (typeof renderGoals       === 'function') renderGoals();
+          if (typeof renderFinCalendar === 'function') renderFinCalendar();
         })
         .subscribe();
     } catch (e) { _syncBadge('err'); console.error('finance sync init failed', e); }
   })();
+
+  // ============================================================
+  // OVERVIEW — income / expense dashboard with month selector
+  // ============================================================
+  const MONTH_NAMES_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let _ovwYear  = new Date().getFullYear();
+  let _ovwMonth = new Date().getMonth();
+
+  function _ovwFmtMonth(year, month) {
+    return MONTH_NAMES_FULL[month] + ' ' + year;
+  }
+
+  function renderOverview() {
+    const now = new Date();
+    const monthKey  = _ovwYear + '-' + String(_ovwMonth + 1).padStart(2, '0');
+    const prevDate  = new Date(_ovwYear, _ovwMonth - 1, 1);
+    const prevKey   = prevDate.getFullYear() + '-' + String(prevDate.getMonth() + 1).padStart(2, '0');
+
+    const labelEl = document.getElementById('ovwMonthLabel');
+    if (labelEl) labelEl.textContent = _ovwFmtMonth(_ovwYear, _ovwMonth);
+
+    const nextBtn = document.getElementById('ovwNextBtn');
+    if (nextBtn) nextBtn.disabled = (_ovwYear === now.getFullYear() && _ovwMonth === now.getMonth());
+
+    const items = storeGet('transactions') || [];
+    function monthTotals(key) {
+      let income = 0, expense = 0;
+      const cats = {};
+      items.forEach(tx => {
+        if (!(tx.date || '').startsWith(key)) return;
+        const v = Number(tx.amount) || 0;
+        if (tx.type === 'income') { income += v; }
+        else { expense += v; cats[tx.category || 'other'] = (cats[tx.category || 'other'] || 0) + v; }
+      });
+      return { income, expense, cats };
+    }
+    const cur  = monthTotals(monthKey);
+    const prev = monthTotals(prevKey);
+    const balance = cur.income - cur.expense;
+
+    const balEl = document.getElementById('ovwBalance');
+    if (balEl) {
+      balEl.textContent = fmtMoney(Math.abs(balance));
+      balEl.className = 'ovw-balance-num ' + (balance > 0 ? 'positive' : balance < 0 ? 'negative' : 'zero');
+    }
+    const saveTextEl = document.getElementById('ovwSavingsText');
+    if (saveTextEl) {
+      if (cur.income > 0) {
+        const rate = Math.round((cur.income - cur.expense) / cur.income * 100);
+        saveTextEl.textContent = (balance >= 0 ? 'Surplus · ' : 'Deficit · ') + Math.abs(rate) + '% savings rate';
+      } else {
+        saveTextEl.textContent = 'No income logged this month';
+      }
+    }
+
+    const incEl = document.getElementById('ovwIncome');
+    if (incEl) incEl.textContent = fmtMoney(cur.income);
+    const expEl = document.getElementById('ovwExpenses');
+    if (expEl) expEl.textContent = fmtMoney(cur.expense);
+
+    function pctChange(curr, prev) {
+      if (!prev) return null;
+      return Math.round((curr - prev) / prev * 100);
+    }
+    const incChangeEl = document.getElementById('ovwIncomeChange');
+    if (incChangeEl) {
+      const p = pctChange(cur.income, prev.income);
+      if (p === null) { incChangeEl.textContent = ''; }
+      else {
+        incChangeEl.className = 'ovw-metric-change ' + (p >= 0 ? 'up' : 'down');
+        incChangeEl.textContent = (p >= 0 ? '+' : '') + p + '% vs prev';
+      }
+    }
+    const expChangeEl = document.getElementById('ovwExpChange');
+    if (expChangeEl) {
+      const p = pctChange(cur.expense, prev.expense);
+      if (p === null) { expChangeEl.textContent = ''; }
+      else {
+        expChangeEl.className = 'ovw-metric-change ' + (p <= 0 ? 'up' : 'down');
+        expChangeEl.textContent = (p >= 0 ? '+' : '') + p + '% vs prev';
+      }
+    }
+
+    const rateEl = document.getElementById('ovwSavingsRate');
+    if (rateEl) {
+      if (cur.income > 0) {
+        const rate = Math.round((cur.income - cur.expense) / cur.income * 100);
+        rateEl.textContent = rate + '%';
+        rateEl.style.color = rate >= 20 ? '#6BE3A4' : rate >= 0 ? 'var(--text-primary)' : '#FF8A8A';
+      } else {
+        rateEl.textContent = '—';
+        rateEl.style.color = '';
+      }
+    }
+
+    const catSection = document.getElementById('ovwCatSection');
+    const catList = document.getElementById('ovwCatList');
+    if (catSection && catList) {
+      const entries = Object.entries(cur.cats).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) { catSection.style.display = 'none'; }
+      else {
+        catSection.style.display = '';
+        const maxVal = entries[0][1];
+        const CAT_COLORS_MAP = {
+          food: '#F97316', transport: '#7DD3FC', shopping: '#B794F4',
+          entertain: '#FBBF24', health: '#6EE7B7', housing: '#94A3B8',
+          utilities: '#F2C063', other: '#76746E'
+        };
+        catList.innerHTML = entries.map(([key, val]) => {
+          const meta = TXN_CATS[key] || { label: key, emoji: '📦', color: '#76746E' };
+          const pct  = maxVal > 0 ? Math.round(val / maxVal * 100) : 0;
+          return '<div class="ovw-cat-row">'
+            + '<div class="ovw-cat-name">' + meta.emoji + ' ' + escapeHtml(meta.label) + '</div>'
+            + '<div class="ovw-cat-bar-wrap"><div class="ovw-cat-bar-fill" style="width:' + pct + '%;background:' + (meta.color || '#76746E') + '"></div></div>'
+            + '<div class="ovw-cat-amt">' + fmtMoney(val) + '</div>'
+            + '</div>';
+        }).join('');
+      }
+    }
+  }
+
+  const ovwPrev = document.getElementById('ovwPrevBtn');
+  const ovwNext = document.getElementById('ovwNextBtn');
+  if (ovwPrev) ovwPrev.addEventListener('click', () => {
+    if (_ovwMonth === 0) { _ovwMonth = 11; _ovwYear--; } else _ovwMonth--;
+    renderOverview();
+  });
+  if (ovwNext) ovwNext.addEventListener('click', () => {
+    const now = new Date();
+    if (_ovwYear === now.getFullYear() && _ovwMonth === now.getMonth()) return;
+    if (_ovwMonth === 11) { _ovwMonth = 0; _ovwYear++; } else _ovwMonth++;
+    renderOverview();
+  });
+  renderOverview();
+
+  // ============================================================
+  // BUDGETS — category limits, track spending from transactions
+  // Stored as: [{ id, category, limit }]  (always CHF base)
+  // ============================================================
+  function renderBudgets() {
+    const budgets = storeGet('budgets') || [];
+    const heroEl  = document.getElementById('bgtHero');
+    const listEl  = document.getElementById('bgtList');
+    const emptyEl = document.getElementById('bgtEmpty');
+    if (!listEl) return;
+
+    const now = new Date();
+    const monthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    const txns = storeGet('transactions') || [];
+    const monthSpent = {};
+    txns.forEach(tx => {
+      if (!(tx.date || '').startsWith(monthKey) || tx.type === 'income') return;
+      const cat = tx.category || 'other';
+      monthSpent[cat] = (monthSpent[cat] || 0) + (Number(tx.amount) || 0);
+    });
+
+    if (!budgets.length) {
+      if (heroEl)  heroEl.style.display  = 'none';
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      listEl.innerHTML = '';
+      return;
+    }
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (heroEl)  heroEl.style.display = '';
+
+    let totalLimit = 0, totalSpent = 0;
+    budgets.forEach(b => { totalLimit += Number(b.limit) || 0; totalSpent += monthSpent[b.category] || 0; });
+    const totalRem = totalLimit - totalSpent;
+
+    const limEl = document.getElementById('bgtTotalLimit');
+    const sptEl = document.getElementById('bgtTotalSpent');
+    const remEl = document.getElementById('bgtTotalRemaining');
+    if (limEl) limEl.textContent = fmtMoney(totalLimit);
+    if (sptEl) sptEl.textContent = fmtMoney(totalSpent);
+    if (remEl) {
+      remEl.textContent = fmtMoney(Math.abs(totalRem));
+      remEl.className = 'bgt-hero-val ' + (totalRem < 0 ? 'over' : 'ok');
+    }
+
+    listEl.innerHTML = '';
+    budgets.forEach((b, idx) => {
+      const limit = Number(b.limit) || 0;
+      const spent = monthSpent[b.category] || 0;
+      const pct   = limit > 0 ? Math.min(100, Math.round(spent / limit * 100)) : 0;
+      const over  = pct >= 100;
+      const warn  = pct >= 80 && !over;
+      const color = over ? '#FF8A8A' : warn ? '#F2C063' : '#6BE3A4';
+      const badgeTxt  = over ? 'Over' : warn ? 'Near limit' : 'On track';
+      const badgeCls  = over ? 'over' : warn ? 'warn' : 'ok';
+      const card = document.createElement('div');
+      card.className = 'bgt-card';
+      card.innerHTML = ''
+        + '<div class="bgt-card-head">'
+        +   '<div class="bgt-cat-name">' + escapeHtml(b.category) + '</div>'
+        +   '<span class="bgt-badge ' + badgeCls + '">' + badgeTxt + '</span>'
+        + '</div>'
+        + '<div class="bgt-progress-row">'
+        +   '<div class="bgt-nums">' + fmtMoney(spent) + ' / ' + fmtMoney(limit) + '</div>'
+        +   '<div style="font-size:10px;color:' + color + ';font-family:var(--font-mono);font-weight:700">' + pct + '%</div>'
+        + '</div>'
+        + '<div class="bgt-bar-wrap"><div class="bgt-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
+        + '<div class="bgt-card-actions">'
+        +   '<button class="bgt-edit-btn" data-bgt-idx="' + idx + '">✏ Edit</button>'
+        +   '<button class="bgt-del-btn" data-bgt-idx="' + idx + '">× Delete</button>'
+        + '</div>';
+      listEl.appendChild(card);
+    });
+
+    listEl.querySelectorAll('.bgt-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.bgtIdx, 10);
+        openBgtModal(i);
+      });
+    });
+    listEl.querySelectorAll('.bgt-del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.bgtIdx, 10);
+        const arr = storeGet('budgets') || [];
+        if (!confirm('Delete "' + arr[i].category + '" budget?')) return;
+        arr.splice(i, 1);
+        storeSet('budgets', arr);
+        renderBudgets();
+      });
+    });
+  }
+
+  function openBgtModal(idx) {
+    const budgets = storeGet('budgets') || [];
+    const b = idx != null ? budgets[idx] : null;
+    openFinModal(
+      b ? 'Edit budget' : 'Add budget',
+      '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Category name</label>'
+        + '<input class="fin-modal-input" id="bgtModalCat" type="text" value="' + escapeHtml(b ? b.category : '') + '" placeholder="e.g. Food">'
+        + '</div>'
+        + '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Monthly limit (CHF)</label>'
+        + '<input class="fin-modal-input" id="bgtModalLimit" type="number" step="0.01" value="' + (b ? b.limit : '') + '" placeholder="0.00">'
+        + '</div>',
+      [
+        { label: 'Cancel', cls: 'fin-modal-cancel', cb: closeFinModal },
+        { label: b ? 'Save' : 'Add', cls: 'fin-modal-save', cb: () => {
+          const cat   = (document.getElementById('bgtModalCat').value || '').trim();
+          const limit = parseFloat(document.getElementById('bgtModalLimit').value);
+          if (!cat || isNaN(limit) || limit <= 0) return;
+          const arr = storeGet('budgets') || [];
+          if (idx != null) { arr[idx] = { ...arr[idx], category: cat, limit }; }
+          else { arr.push({ id: 'b_' + Date.now(), category: cat, limit }); }
+          storeSet('budgets', arr);
+          closeFinModal();
+          renderBudgets();
+        }}
+      ]
+    );
+    setTimeout(() => { const el = document.getElementById('bgtModalCat'); if (el) el.focus(); }, 50);
+  }
+
+  function doAddBudget() {
+    const catEl   = document.getElementById('bgtName');
+    const limitEl = document.getElementById('bgtLimit');
+    if (!catEl || !limitEl) return;
+    const cat   = (catEl.value || '').trim();
+    const limit = parseFloat(limitEl.value);
+    if (!cat || isNaN(limit) || limit <= 0) { catEl.focus(); return; }
+    const arr = storeGet('budgets') || [];
+    // Update if category already exists, otherwise push
+    const existing = arr.findIndex(b => b.category.toLowerCase() === cat.toLowerCase());
+    if (existing >= 0) { arr[existing].limit = limit; }
+    else { arr.push({ id: 'b_' + Date.now(), category: cat, limit }); }
+    storeSet('budgets', arr);
+    catEl.value = ''; limitEl.value = '';
+    renderBudgets();
+  }
+  window.__addBudget = doAddBudget;
+  const _bgtName  = document.getElementById('bgtName');
+  const _bgtLimit = document.getElementById('bgtLimit');
+  if (_bgtName)  _bgtName.addEventListener('keydown',  e => { if (e.key === 'Enter') doAddBudget(); });
+  if (_bgtLimit) _bgtLimit.addEventListener('keydown', e => { if (e.key === 'Enter') doAddBudget(); });
+  const _bgtAddBtn = document.getElementById('bgtAddBtn');
+  if (_bgtAddBtn) _bgtAddBtn.addEventListener('click', doAddBudget);
+  renderBudgets();
+
+  // ============================================================
+  // GOALS — savings targets with contributions
+  // Stored as: [{ id, name, target, saved, deadline, ts }]
+  // ============================================================
+  function renderGoals() {
+    const goals   = storeGet('goals') || [];
+    const listEl  = document.getElementById('goalList');
+    const emptyEl = document.getElementById('goalEmpty');
+    const heroEl  = document.getElementById('goalHeroRow');
+    if (!listEl) return;
+
+    if (!goals.length) {
+      if (heroEl)  heroEl.style.display  = 'none';
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      listEl.innerHTML = '';
+      // Reset hero
+      ['goalTotalSaved','goalTotalTarget','goalCount'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
+      return;
+    }
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (heroEl)  heroEl.style.display = '';
+
+    let totalSaved = 0, totalTarget = 0;
+    goals.forEach(g => { totalSaved += Number(g.saved) || 0; totalTarget += Number(g.target) || 0; });
+    const sEl = document.getElementById('goalTotalSaved');
+    const tEl = document.getElementById('goalTotalTarget');
+    const cEl = document.getElementById('goalCount');
+    if (sEl) sEl.textContent = fmtMoney(totalSaved);
+    if (tEl) tEl.textContent = fmtMoney(totalTarget);
+    if (cEl) cEl.textContent = goals.length;
+
+    const now = new Date();
+    listEl.innerHTML = '';
+    goals.forEach((g, idx) => {
+      const saved  = Number(g.saved)  || 0;
+      const target = Number(g.target) || 0;
+      const pct    = target > 0 ? Math.min(100, Math.round(saved / target * 100)) : 0;
+      const done   = pct >= 100;
+      const color  = done ? '#6BE3A4' : pct >= 60 ? '#9D4EDD' : pct >= 30 ? '#4CC9F0' : '#F2C063';
+      let deadlineHtml = '';
+      if (g.deadline) {
+        const dl = new Date(g.deadline + 'T00:00');
+        const daysLeft = Math.ceil((dl - now) / 86400000);
+        const dlCls    = daysLeft < 0 ? 'overdue' : '';
+        deadlineHtml = '<div class="goal-card-deadline ' + dlCls + '">'
+          + (daysLeft < 0 ? 'Overdue' : daysLeft === 0 ? 'Due today' : daysLeft + 'd left')
+          + '</div>';
+      }
+      const card = document.createElement('div');
+      card.className = 'goal-card';
+      card.innerHTML = ''
+        + '<div class="goal-card-head">'
+        +   '<div class="goal-card-name">' + escapeHtml(g.name) + '</div>'
+        +   (done ? '<span class="bgt-badge ok">Done!</span>' : '<span class="bgt-badge" style="background:' + color + '22;color:' + color + '">' + pct + '%</span>')
+        + '</div>'
+        + deadlineHtml
+        + '<div class="goal-card-nums">'
+        +   '<span class="goal-card-saved">' + fmtMoney(saved) + '</span>'
+        +   '<span class="goal-card-target"> / ' + fmtMoney(target) + '</span>'
+        + '</div>'
+        + '<div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
+        + '<div class="goal-card-actions">'
+        +   (done ? '' : '<button class="goal-contribute-btn" data-goal-idx="' + idx + '">+ Add money</button>')
+        +   '<button class="goal-edit-btn" data-goal-idx="' + idx + '">✏ Edit</button>'
+        +   '<button class="goal-del-btn" data-goal-idx="' + idx + '">× Delete</button>'
+        + '</div>';
+      listEl.appendChild(card);
+    });
+
+    listEl.querySelectorAll('.goal-contribute-btn').forEach(btn => {
+      btn.addEventListener('click', () => openContributeModal(parseInt(btn.dataset.goalIdx, 10)));
+    });
+    listEl.querySelectorAll('.goal-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openGoalEditModal(parseInt(btn.dataset.goalIdx, 10)));
+    });
+    listEl.querySelectorAll('.goal-del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.goalIdx, 10);
+        const arr = storeGet('goals') || [];
+        if (!confirm('Delete goal "' + arr[i].name + '"?')) return;
+        arr.splice(i, 1);
+        storeSet('goals', arr);
+        renderGoals();
+      });
+    });
+  }
+
+  function openContributeModal(idx) {
+    const goals = storeGet('goals') || [];
+    const g = goals[idx];
+    if (!g) return;
+    openFinModal(
+      'Add to: ' + g.name,
+      '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Amount (CHF)</label>'
+        + '<input class="fin-modal-input" id="contributeAmt" type="number" step="0.01" placeholder="0.00">'
+        + '</div>',
+      [
+        { label: 'Cancel', cls: 'fin-modal-cancel', cb: closeFinModal },
+        { label: '+ Add', cls: 'fin-modal-save', cb: () => {
+          const amt = parseFloat(document.getElementById('contributeAmt').value);
+          if (isNaN(amt) || amt <= 0) return;
+          const arr = storeGet('goals') || [];
+          arr[idx].saved = (Number(arr[idx].saved) || 0) + amt;
+          storeSet('goals', arr);
+          closeFinModal();
+          renderGoals();
+        }}
+      ]
+    );
+    setTimeout(() => { const el = document.getElementById('contributeAmt'); if (el) el.focus(); }, 50);
+  }
+
+  function openGoalEditModal(idx) {
+    const goals = storeGet('goals') || [];
+    const g = idx != null ? goals[idx] : null;
+    openFinModal(
+      g ? 'Edit goal' : 'Add goal',
+      '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Goal name</label>'
+        + '<input class="fin-modal-input" id="goalModalName" type="text" value="' + escapeHtml(g ? g.name : '') + '" placeholder="e.g. Japan trip">'
+        + '</div>'
+        + '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Target amount (CHF)</label>'
+        + '<input class="fin-modal-input" id="goalModalTarget" type="number" step="0.01" value="' + (g ? g.target : '') + '" placeholder="0.00">'
+        + '</div>'
+        + '<div class="fin-modal-field">'
+        + '<label class="fin-modal-label">Deadline (optional)</label>'
+        + '<input class="fin-modal-input" id="goalModalDeadline" type="date" value="' + (g && g.deadline ? g.deadline : '') + '">'
+        + '</div>',
+      [
+        { label: 'Cancel', cls: 'fin-modal-cancel', cb: closeFinModal },
+        { label: 'Save', cls: 'fin-modal-save', cb: () => {
+          const name     = (document.getElementById('goalModalName').value || '').trim();
+          const target   = parseFloat(document.getElementById('goalModalTarget').value);
+          const deadline = document.getElementById('goalModalDeadline').value || null;
+          if (!name || isNaN(target) || target <= 0) return;
+          const arr = storeGet('goals') || [];
+          if (idx != null) { arr[idx] = { ...arr[idx], name, target, deadline }; }
+          else { arr.push({ id: 'g_' + Date.now(), name, target, saved: 0, deadline, ts: Date.now() }); }
+          storeSet('goals', arr);
+          closeFinModal();
+          renderGoals();
+        }}
+      ]
+    );
+    setTimeout(() => { const el = document.getElementById('goalModalName'); if (el) el.focus(); }, 50);
+  }
+
+  function doAddGoal() {
+    const nEl = document.getElementById('goalName');
+    const tEl = document.getElementById('goalTarget');
+    const dEl = document.getElementById('goalDeadline');
+    if (!nEl || !tEl) return;
+    const name   = (nEl.value || '').trim();
+    const target = parseFloat(tEl.value);
+    if (!name || isNaN(target) || target <= 0) { nEl.focus(); return; }
+    const deadline = (dEl && dEl.value) ? dEl.value : null;
+    const arr = storeGet('goals') || [];
+    arr.push({ id: 'g_' + Date.now(), name, target, saved: 0, deadline, ts: Date.now() });
+    storeSet('goals', arr);
+    nEl.value = ''; tEl.value = '';
+    if (dEl) dEl.value = '';
+    renderGoals();
+  }
+  window.__addGoal = doAddGoal;
+  const _goalName   = document.getElementById('goalName');
+  const _goalTarget = document.getElementById('goalTarget');
+  if (_goalName)   _goalName.addEventListener('keydown',   e => { if (e.key === 'Enter') doAddGoal(); });
+  if (_goalTarget) _goalTarget.addEventListener('keydown', e => { if (e.key === 'Enter') doAddGoal(); });
+  const _goalAddBtn = document.getElementById('goalAddBtn');
+  if (_goalAddBtn) _goalAddBtn.addEventListener('click', doAddGoal);
+  renderGoals();
+
+  // ============================================================
+  // FINANCIAL CALENDAR — monthly grid, click a day to drill down
+  // ============================================================
+  let _calYear  = new Date().getFullYear();
+  let _calMonth = new Date().getMonth();
+  let _calSelectedDay = null;
+
+  function renderFinCalendar() {
+    const now = new Date();
+    const year  = _calYear;
+    const month = _calMonth;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDow    = new Date(year, month, 1).getDay();
+    const todayStr    = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    const monthKey    = year + '-' + String(month + 1).padStart(2, '0');
+
+    const labelEl = document.getElementById('calMonthLabel');
+    if (labelEl) labelEl.textContent = MONTH_NAMES_FULL[month] + ' ' + year;
+
+    const txns = storeGet('transactions') || [];
+    const byDate = {};
+    let monthIncome = 0, monthExpense = 0;
+    txns.forEach(tx => {
+      if (!(tx.date || '').startsWith(monthKey)) return;
+      const isInc = tx.type === 'income';
+      const v = Number(tx.amount) || 0;
+      if (isInc) monthIncome += v; else monthExpense += v;
+      if (!byDate[tx.date]) byDate[tx.date] = { income: 0, expense: 0, list: [] };
+      if (isInc) byDate[tx.date].income += v; else byDate[tx.date].expense += v;
+      byDate[tx.date].list.push(tx);
+    });
+
+    const calIncEl = document.getElementById('calIncome');
+    const calExpEl = document.getElementById('calExpenses');
+    if (calIncEl) calIncEl.textContent = fmtMoney(monthIncome);
+    if (calExpEl) calExpEl.textContent = fmtMoney(monthExpense);
+
+    const grid = document.getElementById('finCalGrid');
+    if (!grid) return;
+    let html = '';
+    for (let i = 0; i < firstDow; i++) {
+      html += '<div class="fin-cal-cell fin-cal-empty"></div>';
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      const day = byDate[dateStr];
+      let cls = 'fin-cal-cell';
+      if (dateStr === todayStr) cls += ' fin-cal-today';
+      if (dateStr === _calSelectedDay) cls += ' fin-cal-selected';
+      if (day) cls += ' fin-cal-has-txns';
+      html += '<div class="' + cls + '" data-date="' + dateStr + '">'
+        + '<div class="fin-cal-day-num">' + d + '</div>'
+        + (day && day.expense > 0 ? '<div class="fin-cal-exp">−' + fmtMoney(day.expense).split(' ')[1] + '</div>' : '')
+        + (day && day.income  > 0 ? '<div class="fin-cal-inc">+' + fmtMoney(day.income).split(' ')[1]  + '</div>' : '')
+        + '</div>';
+    }
+    grid.innerHTML = html;
+
+    grid.querySelectorAll('.fin-cal-cell[data-date]').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const d = cell.dataset.date;
+        _calSelectedDay = (_calSelectedDay === d) ? null : d;
+        renderFinCalendar();
+      });
+    });
+
+    const detail = document.getElementById('finCalDetail');
+    const detailHead = document.getElementById('finCalDetailHead');
+    const detailList = document.getElementById('finCalDetailList');
+    if (detail) {
+      if (_calSelectedDay && byDate[_calSelectedDay]) {
+        detail.style.display = '';
+        const dp = new Date(_calSelectedDay + 'T00:00');
+        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+        if (detailList) {
+          detailList.innerHTML = byDate[_calSelectedDay].list.map(tx => {
+            const isInc = tx.type === 'income';
+            return '<div class="fin-cal-detail-row">'
+              + '<div class="fin-cal-detail-name">' + escapeHtml(tx.name || '') + '</div>'
+              + '<div class="fin-cal-detail-amt ' + (isInc ? 'inc' : 'exp') + '">'
+              + (isInc ? '+' : '−') + fmtMoney(tx.amount).split(' ')[1]
+              + '</div>'
+              + '</div>';
+          }).join('');
+        }
+      } else if (_calSelectedDay) {
+        detail.style.display = '';
+        const dp = new Date(_calSelectedDay + 'T00:00');
+        if (detailHead) detailHead.textContent = dp.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+        if (detailList) detailList.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0">No transactions on this day.</div>';
+      } else {
+        detail.style.display = 'none';
+      }
+    }
+  }
+
+  const calPrev = document.getElementById('calPrevBtn');
+  const calNext = document.getElementById('calNextBtn');
+  if (calPrev) calPrev.addEventListener('click', () => {
+    if (_calMonth === 0) { _calMonth = 11; _calYear--; } else _calMonth--;
+    _calSelectedDay = null; renderFinCalendar();
+  });
+  if (calNext) calNext.addEventListener('click', () => {
+    if (_calMonth === 11) { _calMonth = 0; _calYear++; } else _calMonth++;
+    _calSelectedDay = null; renderFinCalendar();
+  });
+  renderFinCalendar();
+
+  // ============================================================
+  // SHARED FIN MODAL — lightweight reusable overlay
+  // ============================================================
+  function openFinModal(title, bodyHtml, buttons) {
+    const overlay = document.getElementById('finModal');
+    const titleEl = document.getElementById('finModalTitle');
+    const bodyEl  = document.getElementById('finModalBody');
+    const actEl   = document.getElementById('finModalActions');
+    if (!overlay) return;
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl)  bodyEl.innerHTML = bodyHtml;
+    if (actEl) {
+      actEl.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = b.cls;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.cb);
+        actEl.appendChild(btn);
+      });
+    }
+    overlay.style.display = 'flex';
+  }
+  function closeFinModal() {
+    const overlay = document.getElementById('finModal');
+    if (overlay) overlay.style.display = 'none';
+  }
+  window.closeFinModal = closeFinModal;
+  const _finModalOverlay = document.getElementById('finModal');
+  if (_finModalOverlay) {
+    _finModalOverlay.addEventListener('click', e => { if (e.target === _finModalOverlay) closeFinModal(); });
+  }
 
 })();
