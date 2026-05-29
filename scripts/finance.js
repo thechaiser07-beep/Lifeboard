@@ -1090,9 +1090,22 @@
     const txnTopCatEl  = document.getElementById('txnTopCat');
     const txnAllTimeEl = document.getElementById('txnAllTime');
 
+    // Re-compute with income/expense distinction
+    let monthIncome = 0, monthExpense = 0, ytdIncome = 0, ytdExpense = 0;
+    items.forEach(tx => {
+      const v = Number(tx.amount) || 0;
+      const txDate = tx.date || '';
+      const isInc = (tx.type === 'income');
+      if (txDate.startsWith(thisYear))  { isInc ? ytdIncome += v : ytdExpense += v; }
+      if (txDate.startsWith(thisMonth)) { isInc ? monthIncome += v : monthExpense += v; }
+    });
+    monthTotal = monthExpense;
+    ytdTotal   = ytdExpense;
+    allTotal   = items.filter(tx => tx.type !== 'income').reduce((s, tx) => s + (Number(tx.amount) || 0), 0);
+
     if (heroMonth)    heroMonth.textContent    = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
-    if (heroAmt)      heroAmt.textContent      = fmtMoney(monthTotal);
-    if (txnYtdEl)     txnYtdEl.textContent     = fmtMoney(ytdTotal);
+    if (heroAmt)      heroAmt.textContent      = fmtMoney(monthExpense);
+    if (txnYtdEl)     txnYtdEl.textContent     = fmtMoney(ytdExpense);
     const mthItems = items.filter(tx => (tx.date || '').startsWith(thisMonth));
     if (txnMthCount)  txnMthCount.textContent  = mthItems.length + (mthItems.length === 1 ? ' txn' : ' txns');
     if (txnTopCatEl) {
